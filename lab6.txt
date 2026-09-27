@@ -1,0 +1,228 @@
+PS C:\Users\99655\Documents\Database> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab6;
+CREATE DATABASE
+postgres=# \c lab6
+You are now connected to database "lab6" as user "postgres".
+lab6=# CREATE TABLE students (
+lab6(#     student_id SERIAL PRIMARY KEY,
+lab6(#     first_name VARCHAR(50) NOT NULL,
+lab6(#     last_name VARCHAR(50) NOT NULL,
+lab6(#     email VARCHAR(100) UNIQUE NOT NULL,
+lab6(#     faculty VARCHAR(100)
+lab6(# );
+CREATE TABLE
+lab6=# \dt
+            List of tables
+ Schema |   Name   | Type  |  Owner
+--------+----------+-------+----------
+ public | students | table | postgres
+(1 row)
+
+
+lab6=# \d students
+                                          Table "public.students"
+   Column   |          Type          | Collation | Nullable |                   Default
+------------+------------------------+-----------+----------+----------------------------------------------
+ student_id | integer                |           | not null | nextval('students_student_id_seq'::regclass)
+ first_name | character varying(50)  |           | not null |
+ last_name  | character varying(50)  |           | not null |
+ email      | character varying(100) |           | not null |
+ faculty    | character varying(100) |           |          |
+Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+    "students_email_key" UNIQUE CONSTRAINT, btree (email)
+
+
+lab6=# INSERT INTO students (first_name,last_name, email, faculty) VALUES
+lab6-# ('Alymbek', 'Kasymov', 'alymbek@example.com', 'COMSEH'),
+lab6-# ('Timur', 'Mederbekov', 'timur@example.com', 'MED'),
+lab6-# ('Beka', 'Asanov', 'beka@example.com', 'MAT');
+INSERT 0 3
+lab6=# SELECT * FROM students;
+ student_id | first_name | last_name  |        email        | faculty
+------------+------------+------------+---------------------+---------
+          1 | Alymbek    | Kasymov    | alymbek@example.com | COMSEH
+          2 | Timur      | Mederbekov | timur@example.com   | MED
+          3 | Beka       | Asanov     | beka@example.com    | MAT
+(3 rows)
+
+
+lab6=# INSERT INTO students (last_name, email, faculty) VALUES
+lab6-# ('Sydykov', 'sydykov@example.com', 'COMSEH');
+ERROR:  null value in column "first_name" of relation "students" violates not-null constraint
+DETAIL:  Failing row contains (4, null, Sydykov, sydykov@example.com, COMSEH).
+lab6=# INSERT INTO students (first_name, last_name, email, faculty) VALUES
+lab6-# ('Alymbek', 'Arli', 'alymbek@example.com', 'COMSEH');
+ERROR:  duplicate key value violates unique constraint "students_email_key"
+DETAIL:  Key (email)=(alymbek@example.com) already exists.
+lab6=# ALTER TABLE students
+lab6-# ADD COLUMN age INTEGER;
+ALTER TABLE
+lab6=# ALTER TABLE students
+lab6-# ADD CONSTRAINT students_age CHECK (age >= 18 AND age <= 100);
+ALTER TABLE
+lab6=# SELECT * FROM students;
+ student_id | first_name | last_name  |        email        | faculty | age ------------+------------+------------+---------------------+---------+-----          1 | Alymbek    | Kasymov    | alymbek@example.com | COMSEH  |
+          2 | Timur      | Mederbekov | timur@example.com   | MED     |
+          3 | Beka       | Asanov     | beka@example.com    | MAT     |
+(3 rows)
+
+
+lab6=# UPDATE students SET age = 28 WHERE first_name = 'Alymbek';
+UPDATE 1
+lab6=# UPDATE students SET age = 24 WHERE first_name = 'Timur';
+UPDATE 1
+lab6=# UPDATE students SET age = 20 WHERE first_name = 'Beka';
+UPDATE 1
+lab6=# SELECT * FROM students;
+ student_id | first_name | last_name  |        email        | faculty | age ------------+------------+------------+---------------------+---------+-----          1 | Alymbek    | Kasymov    | alymbek@example.com | COMSEH  |  28
+          2 | Timur      | Mederbekov | timur@example.com   | MED     |  24
+          3 | Beka       | Asanov     | beka@example.com    | MAT     |  20
+(3 rows)
+
+
+lab6=# INSERT INTO students (first_name, last_name, email, faculty, age) VALUES
+lab6-# ('Alymbek', 'Arli', 'alymbek@example.com', 'COMSEH', 11);
+ERROR:  new row for relation "students" violates check constraint "students_age"
+DETAIL:  Failing row contains (6, Alymbek, Arli, alymbek@example.com, COMSEH, 11).
+lab6=# \d students
+                                          Table "public.students"
+   Column   |          Type          | Collation | Nullable |                   Default
+------------+------------------------+-----------+----------+----------------------------------------------
+ student_id | integer                |           | not null | nextval('students_student_id_seq'::regclass)
+ first_name | character varying(50)  |           | not null |
+ last_name  | character varying(50)  |           | not null |
+ email      | character varying(100) |           | not null |
+ faculty    | character varying(100) |           |          |
+ age        | integer                |           |          |
+Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+    "students_email_key" UNIQUE CONSTRAINT, btree (email)
+Check constraints:
+    "students_age" CHECK (age >= 18 AND age <= 100)
+
+
+lab6=# ALTER TABLE students
+lab6-# DROP COLUMN faculty;
+ALTER TABLE
+lab6=# ALTER TABLE students
+lab6-# ALTER COLUMN firts_name TYPE TEXT;
+ERROR:  column "firts_name" of relation "students" does not exist
+lab6=# ALTER TABLE students
+lab6-# ALTER COLUMN firsT_name TYPE TEXT;
+ALTER TABLE
+lab6=# ALTER TABLE students
+lab6-# RENAME COLUMN email TO email_address;
+ALTER TABLE
+lab6=# ALTER TABLE students
+lab6-# RENAME TO university_students;
+ALTER TABLE
+lab6=# \d university_students
+                                      Table "public.university_students"
+    Column     |          Type          | Collation | Nullable |                   Default
+---------------+------------------------+-----------+----------+----------------------------------------------
+ student_id    | integer                |           | not null | nextval('students_student_id_seq'::regclass)
+ first_name    | text                   |           | not null |
+ last_name     | character varying(50)  |           | not null |
+ email_address | character varying(100) |           | not null |
+ age           | integer                |           |          |
+Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+    "students_email_key" UNIQUE CONSTRAINT, btree (email_address)
+Check constraints:
+    "students_age" CHECK (age >= 18 AND age <= 100)
+
+
+lab6=# SELECT * FROM university_students;
+ student_id | first_name | last_name  |    email_address    | age
+------------+------------+------------+---------------------+-----
+          1 | Alymbek    | Kasymov    | alymbek@example.com |  28
+          2 | Timur      | Mederbekov | timur@example.com   |  24
+          3 | Beka       | Asanov     | beka@example.com    |  20
+(3 rows)
+
+
+lab6=# CREATE TEMP TABLE temp_table_animals (
+lab6(# animal_name VARCHAR(100),
+lab6(#     habitat VARCHAR(100)
+lab6(# );
+CREATE TABLE
+lab6=# INSERT INTO temp_table_animals (animal_name, habitat) VALUES
+lab6-# ('Penguin', 'Antarctica'),
+lab6-# ('Snow Leopard', 'Mountains'),
+lab6-# ('Brown Bear', 'Forest');
+INSERT 0 3
+lab6=# SELECT * FROM temp_table_animals;
+ animal_name  |  habitat
+--------------+------------
+ Penguin      | Antarctica
+ Snow Leopard | Mountains
+ Brown Bear   | Forest
+(3 rows)
+
+
+lab6=# \dt
+                   List of tables
+   Schema   |        Name         | Type  |  Owner
+------------+---------------------+-------+----------
+ pg_temp_58 | temp_table_animals  | table | postgres
+ public     | university_students | table | postgres
+(2 rows)
+
+
+lab6=# \q
+PS C:\Users\99655\Documents\Database> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# \c lab6
+You are now connected to database "lab6" as user "postgres".
+lab6=# \dt
+                 List of tables
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | university_students | table | postgres
+(1 row)
+
+
+lab6=# CREATE TABLE existing_table (
+lab6(# table_id SERIAL PRIMARY KEY,
+lab6(#     name VARCHAR(50)
+lab6(# );
+CREATE TABLE
+lab6=# \dt
+                 List of tables
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | existing_table      | table | postgres
+ public | university_students | table | postgres
+(2 rows)
+
+
+lab6=# DROP TABLE IF EXISTS existing_table;
+DROP TABLE
+lab6=# \dt
+                 List of tables
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | university_students | table | postgres
+(1 row)
+
+
+lab6=# DROP TABLE IF EXISTS existing_table;
+NOTICE:  table "existing_table" does not exist, skipping
+DROP TABLE
+lab6=# \q
