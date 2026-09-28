@@ -1,0 +1,295 @@
+lab7.txt
+PS C:\WINDOWS\System32> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab7;
+CREATE DATABASE
+postgres=# \c lab7
+You are now connected to database "lab7" as user "postgres".
+lab7=# CREATE TABLE students (
+lab7(#     student_id INTEGER PRIMARY KEY,
+lab7(#     name VARCHAR(100),
+lab7(#     email VARCHAR(150)
+lab7(# );
+CREATE TABLE
+lab7=# \d students
+                       Table "public.students"
+   Column   |          Type          | Collation | Nullable | Default
+------------+------------------------+-----------+----------+---------
+ student_id | integer                |           | not null |  name       | character varying(100) |           |          |  email      | character varying(150) |           |          | Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+
+
+lab7=# INSERT INTO students (student_id, name, email) VALUES
+lab7-# (1, 'Alice Johnson', 'alice@alatoo.edu.kg'),
+lab7-# (2, 'Bob Smith', 'bob@alatoo.edu.kg'),
+lab7-# (3, 'Carol Davis', 'carol@alatoo.edu.kg');
+INSERT 0 3
+lab7=# SELECT * FROM students;
+ student_id |     name      |        email
+------------+---------------+---------------------
+          1 | Alice Johnson | alice@alatoo.edu.kg
+          2 | Bob Smith     | bob@alatoo.edu.kg
+          3 | Carol Davis   | carol@alatoo.edu.kg
+(3 rows)
+
+
+lab7=# INSERT INTO students (student_id, name, email) VALUES
+lab7-# (1, 'Akyl Kubatov', 'akyl@alatoo.edu.kg');
+ERROR:  duplicate key value violates unique constraint "students_pkey"
+DETAIL:  Key (student_id)=(1) already exists.
+lab7=# SELECT * FROM students;
+ student_id |     name      |        email
+------------+---------------+---------------------
+          1 | Alice Johnson | alice@alatoo.edu.kg
+          2 | Bob Smith     | bob@alatoo.edu.kg
+          3 | Carol Davis   | carol@alatoo.edu.kg
+(3 rows)
+
+
+lab7=# INSERT INTO students (student_id, name, email) VALUES
+lab7-# (NULL, 'Akyl Kubatov', 'akyl@alatoo.edu.kg');
+ERROR:  null value in column "student_id" of relation "students" violates not-null constraint
+DETAIL:  Failing row contains (null, Akyl Kubatov, akyl@alatoo.edu.kg).
+lab7=# CREATE TABLE students_table_level (
+lab7(# student_id INTEGER,
+lab7(#     name VARCHAR(100),
+lab7(#     email VARCHAR(150),
+lab7(#     PRIMARY KEY (student_id)
+lab7(# );
+CREATE TABLE
+lab7=# \d students_table_level
+                 Table "public.students_table_level"
+   Column   |          Type          | Collation | Nullable | Default
+------------+------------------------+-----------+----------+---------
+ student_id | integer                |           | not null |  name       | character varying(100) |           |          |  email      | character varying(150) |           |          | Indexes:
+    "students_table_level_pkey" PRIMARY KEY, btree (student_id)
+lab7=# CREATE TABLE students_named_constraint (
+lab7(# student_id INTEGER,
+lab7(#     name VARCHAR(100),
+lab7(#     email VARCHAR(150),
+lab7(#     CONSTRAINT pk_students PRIMARY KEY (student_id)
+lab7(# );
+CREATE TABLE
+lab7=# \d students_named_constraint
+               Table "public.students_named_constraint"
+   Column   |          Type          | Collation | Nullable | Default
+------------+------------------------+-----------+----------+---------
+ student_id | integer                |           | not null |  name       | character varying(100) |           |          |  email      | character varying(150) |           |          | Indexes:
+    "pk_students" PRIMARY KEY, btree (student_id)
+lab7=# CREATE TABLE students_add_key (
+lab7(# student_id INTEGER,
+lab7(# name VARCHAR(100),
+lab7(# email VARCHAR(150)
+lab7(# );
+CREATE TABLE
+lab7=# \d students_add_key
+                   Table "public.students_add_key"
+   Column   |          Type          | Collation | Nullable | Default
+------------+------------------------+-----------+----------+---------
+ student_id | integer                |           |          |  name       | character varying(100) |           |          |  email      | character varying(150) |           |          |
+
+lab7=# ALTER TABLE students_add_key ADD CONSTRAINT pk_students_add_key PRIMARY KEY (student_id);
+ALTER TABLE
+lab7=# \d students_add_key
+                   Table "public.students_add_key"
+   Column   |          Type          | Collation | Nullable | Default
+------------+------------------------+-----------+----------+---------
+ student_id | integer                |           | not null |  name       | character varying(100) |           |          |  email      | character varying(150) |           |          | Indexes:
+    "pk_students_add_key" PRIMARY KEY, btree (student_id)
+
+
+lab7=# \dt
+                    List of tables
+ Schema |           Name            | Type  |  Owner
+--------+---------------------------+-------+----------
+ public | students                  | table | postgres
+ public | students_add_key          | table | postgres
+ public | students_named_constraint | table | postgres
+ public | students_table_level      | table | postgres
+(4 rows)
+
+
+lab7=# CREATE TABLE students_single_key (
+lab7(# student_id SERIAL PRIMARY KEY,
+lab7(#     name VARCHAR(100) NOT NULL,
+lab7(#     email VARCHAR(150) UNIQUE,
+lab7(#     faculty VARCHAR(50)
+lab7(# );
+CREATE TABLE
+lab7=# INSERT INTO students_single_key (name, email, faculty) VALUES
+lab7-# ('Alice Johnson', 'alice@alatoo.edu.kg', 'Computer Science'),
+lab7-# ('Bob Smith', 'bob@alatoo.edu.kg', 'Mathematics'),
+lab7-# ('Carol Davis', 'carol@alatoo.edu.kg', 'Computer Science');
+INSERT 0 3
+lab7=# SELECT * FROM students_single_key;
+ student_id |     name      |        email        |     faculty
+------------+---------------+---------------------+------------------
+          1 | Alice Johnson | alice@alatoo.edu.kg | Computer Science
+          2 | Bob Smith     | bob@alatoo.edu.kg   | Mathematics
+          3 | Carol Davis   | carol@alatoo.edu.kg | Computer Science
+(3 rows)
+
+
+lab7=# CREATE TABLE course_enrollments (
+lab7(#     student_id INTEGER,
+lab7(#     course_id INTEGER,
+lab7(#     semester VARCHAR(20),
+lab7(#     enrollment_date DATE DEFAULT CURRENT_DATE,
+lab7(#     grade CHAR(2),
+lab7(#     PRIMARY KEY (student_id, course_id, semester)
+lab7(# );
+CREATE TABLE
+lab7=# INSERT INTO course_enrollments (student_id, course_id, semester, grade) VALUES
+lab7-# (1, 101, '2024-Spring', 'A'),
+lab7-# (1, 102, '2024-Spring', 'B+'),
+lab7-# (2, 101, '2024-Spring', 'A-'),
+lab7-# (1, 101, '2024-Fall', 'A+');
+INSERT 0 4
+lab7=# \d course_enrollments
+                       Table "public.course_enrollments"
+     Column      |         Type          | Collation | Nullable |   Default
+-----------------+-----------------------+-----------+----------+--------------
+ student_id      | integer               |           | not null |
+ course_id       | integer               |           | not null |
+ semester        | character varying(20) |           | not null |
+ enrollment_date | date                  |           |          | CURRENT_DATE
+ grade           | character(2)          |           |          |
+Indexes:
+    "course_enrollments_pkey" PRIMARY KEY, btree (student_id, course_id, semester)
+
+lab7=# INSERT INTO course_enrollments (student_id, course_id, semester, grade) VALUES
+lab7-# (1, 101, '2024-Spring', 'A');
+ERROR:  duplicate key value violates unique constraint "course_enrollments_pkey"
+DETAIL:  Key (student_id, course_id, semester)=(1, 101, 2024-Spring) already exists.
+lab7=# CREATE TABLE products (
+lab7(#     product_id SERIAL PRIMARY KEY,
+lab7(#     product_name VARCHAR(100) NOT NULL,
+lab7(#     price DECIMAL(10,2)
+lab7(# );
+CREATE TABLE
+lab7=# CREATE TABLE transactions (
+lab7(#     transaction_id BIGSERIAL PRIMARY KEY,
+lab7(# amount DECIMAL(15,2),
+lab7(#     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+lab7(# );
+CREATE TABLE
+lab7=# INSERT INTO transactions (amount) VALUES
+lab7-# (1000045.123),
+lab7-# (2569871452.2546),
+lab7-# (8000000000000.54786);
+INSERT 0 3
+lab7=# SELECT * FROM transactions;
+ transaction_id |      amount      |      transaction_date    
+----------------+------------------+----------------------------
+              1 |       1000045.12 | 2026-09-28 23:14:18.116947
+              2 |    2569871452.25 | 2026-09-28 23:14:18.116947
+              3 | 8000000000000.55 | 2026-09-28 23:14:18.116947
+(3 rows)
+
+
+lab7=# CREATE TABLE orders (
+lab7(#     order_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+lab7(#     customer_name VARCHAR(100),
+lab7(#     order_date DATE DEFAULT CURRENT_DATE
+lab7(# );
+CREATE TABLE
+lab7=# INSERT INTO orders (customer_name) VALUES
+lab7-# ('Alice'),
+lab7-# ('Bob'),
+lab7-# ('Carol');
+INSERT 0 3
+lab7=# SELECT * FROM orders;
+ order_id | customer_name | order_date
+----------+---------------+------------
+        1 | Alice         | 2026-09-28
+        2 | Bob           | 2026-09-28
+        3 | Carol         | 2026-09-28
+(3 rows)
+
+
+lab7=# CREATE TABLE customers (
+lab7(#     customer_id INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+lab7(#     customer_name VARCHAR(100),
+lab7(#     email VARCHAR(150)
+lab7(# );
+CREATE TABLE
+lab7=# INSERT INTO customers (customer_id, customer_name, email) VALUES
+lab7-# (1000, 'VIP Customer', 'vip@example.com');
+INSERT 0 1
+lab7=# SELECT * FROM customers;
+ customer_id | customer_name |      email
+-------------+---------------+-----------------
+        1000 | VIP Customer  | vip@example.com
+(1 row)
+
+
+lab7=# SELECT * FROM students_table_level;
+ student_id | name | email
+------------+------+-------
+(0 rows)
+
+
+lab7=# INSERT INTO students_table_level (student_id, name, email) VALUES
+lab7-# (1, 'Alice Johnson', 'alice@alatoo.edu.kg'),
+lab7-# (2, 'Bob Smith', 'bob@alatoo.edu.kg'),
+lab7-# (3, 'Carol Davis', 'carol@alatoo.edu.kg');
+INSERT 0 3
+lab7=# SELECT * FROM students_table_level;
+ student_id |     name      |        email
+------------+---------------+---------------------
+          1 | Alice Johnson | alice@alatoo.edu.kg
+          2 | Bob Smith     | bob@alatoo.edu.kg
+          3 | Carol Davis   | carol@alatoo.edu.kg
+(3 rows)
+
+
+lab7=# INSERT INTO students_table_level (student_id, name, email) VALUES
+lab7-# (1, 'Akyl Kubatov', 'akyl@alatoo.edu.kg');
+ERROR:  duplicate key value violates unique constraint "students_table_level_pkey"
+DETAIL:  Key (student_id)=(1) already exists.
+lab7=# INSERT INTO students_table_level (student_id, name, email) VALUES
+lab7-# (NULL, 'Akyl Kubatov', 'akyl@alatoo.edu.kg');
+ERROR:  null value in column "student_id" of relation "students_table_level" violates not-null constraint
+DETAIL:  Failing row contains (null, Akyl Kubatov, akyl@alatoo.edu.kg).
+lab7=# \dt
+                    List of tables
+ Schema |           Name            | Type  |  Owner
+--------+---------------------------+-------+----------
+ public | course_enrollments        | table | postgres
+ public | customers                 | table | postgres
+ public | orders                    | table | postgres
+ public | products                  | table | postgres
+ public | students                  | table | postgres
+ public | students_add_key          | table | postgres
+ public | students_named_constraint | table | postgres
+ public | students_single_key       | table | postgres
+ public | students_table_level      | table | postgres
+ public | transactions              | table | postgres
+(10 rows)
+
+lab7=# \di
+                                    List of indexes
+ Schema |             Name              | Type  |  Owner   |           Table
+--------+-------------------------------+-------+----------+---------------------------
+ public | course_enrollments_pkey       | index | postgres | course_enrollments
+ public | customers_pkey                | index | postgres | customers
+ public | orders_pkey                   | index | postgres | orders
+ public | pk_students                   | index | postgres | students_named_constraint
+ public | pk_students_add_key           | index | postgres | students_add_key
+ public | products_pkey                 | index | postgres | products
+ public | students_pkey                 | index | postgres | students
+ public | students_single_key_email_key | index | postgres | students_single_key
+ public | students_single_key_pkey      | index | postgres | students_single_key
+ public | students_table_level_pkey     | index | postgres | students_table_level
+ public | transactions_pkey             | index | postgres | transactions
+(11 rows)
+
+
+
