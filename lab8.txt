@@ -1,0 +1,539 @@
+lab8
+PS C:\WINDOWS\System32>  psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab8;
+CREATE DATABASE
+postgres=# \c lab8
+You are now connected to database "lab8" as user "postgres".
+lab8=# CREATE TABLE departments (
+lab8(# dept_id SERIAL PRIMARY KEY,
+lab8(# dept_name VARCHAR(100) NOT NULL,
+lab8(# location VARCHAR(100)
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE employees (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER REFERENCES departments(dept_id)
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE employees_foreign_key_tablelevel (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER,
+lab8(# FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
+lab8(# );
+CREATE TABLE
+lab8=# ALTER TABLE employees ADD CONSTRAINT fk_employee_department FOREIGN KEY (dept_id) REFERENCES departments(dept_id);
+ALTER TABLE
+lab8=# CREATE TABLE employees_named_constraint (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER,
+lab8(# CONSTRAINT fk_employee_department FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
+lab8(# );
+CREATE TABLE
+lab8=# \dt
+                        List of tables
+ Schema |               Name               | Type  |  Owner
+--------+----------------------------------+-------+----------
+ public | departments                      | table | postgres
+ public | employees                        | table | postgres
+ public | employees_foreign_key_tablelevel | table | postgres
+ public | employees_named_constraint       | table | postgres
+(4 rows)
+
+
+lab8=# INSERT INTO departments (dept_name, location) VALUES
+lab8-# ('Engineering', 'Building A'),
+lab8-# ('Marketing', 'Building B'),
+lab8-# ('HR', 'Building C');
+INSERT 0 3
+lab8=# INSERT INTO employees (first_name, last_name, dept_id) VALUES
+lab8-# ('John', 'Smith', 1);
+INSERT 0 1
+lab8=# INSERT INTO employees (first_name, last_name, dept_id) VALUES
+lab8-# ('Jane', 'Doe', 99);
+ERROR:  insert or update on table "employees" violates foreign key constraint "employees_dept_id_fkey"
+DETAIL:  Key (dept_id)=(99) is not present in table "departments".
+lab8=# DELETE FROM departments WHERE dept_id = 1;
+ERROR:  update or delete on table "departments" violates foreign key constraint "employees_dept_id_fkey" on table "employees"
+DETAIL:  Key (dept_id)=(1) is still referenced from table "employees".
+lab8=# \di
+                                           List of indexes
+ Schema |                 Name                  | Type  |  Owner   |              Table
+--------+---------------------------------------+-------+----------+----------------------------------
+ public | departments_pkey                      | index | postgres | departments
+ public | employees_foreign_key_tablelevel_pkey | index | postgres | employees_foreign_key_tablelevel
+ public | employees_named_constraint_pkey       | index | postgres | employees_named_constraint
+ public | employees_pkey                        | index | postgres | employees
+(4 rows)
+
+
+lab8=# CREATE TABLE employees_on_delete (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER REFERENCES departments(dept_id) ON DELETE CASCADE
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO employees_on_delete (first_name, last_name, dept_id) VALUES ('Syrgak', 'Alykov', 2);
+INSERT 0 1
+lab8=# SELECT * FROM employees_on_delete;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |       2
+(1 row)
+
+
+lab8=# DELETE FROM departments WHERE dept_id = 2;
+DELETE 1
+lab8=# SELECT * FROM employees_on_delete;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+(0 rows)
+
+
+lab8=# CREATE TABLE employees_set_null (
+lab8(#     emp_id SERIAL PRIMARY KEY,
+lab8(#     first_name VARCHAR(50) NOT NULL,
+lab8(#     last_name VARCHAR(50) NOT NULL,
+lab8(#     dept_id INTEGER REFERENCES departments(dept_id) ON DELETE SET NULL
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO employees_set_null (first_name, last_name, dept_id) VALUES
+lab8-# ('Syrgak', 'Alykov', 3);
+INSERT 0 1
+lab8=# SELECT * FROM employees_set_null;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |       3
+(1 row)
+
+
+lab8=# DELETE FROM departments WHERE dept_id = 3;
+DELETE 1
+lab8=# SELECT * FROM employees_set_null;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |
+(1 row)
+
+
+lab8=# CREATE TABLE departments_default (
+lab8(# dept_id INTEGER PRIMARY KEY,
+lab8(# dept_name VARCHAR(100) NOT NULL
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO departments_default (dept_id, dept_name) VALUES
+lab8-# (0, 'Engineering'),
+lab8-# (2, 'Marketing'),
+lab8-# (1, 'HR');
+INSERT 0 3
+lab8=# CREATE TABLE employees_set_default (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER DEFAULT 0 REFERENCES departments_default(dept_id) ON DELETE SET DEFAULT
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO employees_set_default (first_name, last_name, dept_id) VALUES
+lab8-# ('Syrgak', 'Alykov', 2);
+INSERT 0 1
+lab8=# SELECT * FROM employees_set_default;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |       2
+(1 row)
+
+
+lab8=# DELETE FROM departments_default WHERE dept_id = 2;
+DELETE 1
+lab8=# SELECT * FROM employees_set_default;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |       0
+(1 row)
+
+
+lab8=# CREATE TABLE departments_update (
+lab8(# dept_id INTEGER PRIMARY KEY,
+lab8(# dept_name VARCHAR(100) NOT NULL
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO departments_update (dept_id, dept_name) VALUES
+lab8-# (111, 'Marketing');
+INSERT 0 1
+lab8=# CREATE TABLE employees_on_update (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER REFERENCES departments_update(dept_id) ON UPDATE CASCADE
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO employees_on_update (first_name, last_name, dept_id) VALUES
+lab8-#  ('Syrgak', 'Alykov', 111);
+INSERT 0 1
+lab8=# SELECT * FROM employees_on_update;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |     111
+(1 row)
+
+
+lab8=# UPDATE departments_update SET dept_id = 100 WHERE dept_id = 111;
+UPDATE 1
+lab8=# SELECT * FROM employees_on_update;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |     100
+(1 row)
+
+
+lab8=# CREATE TABLE employees_combined_cascade (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# dept_id INTEGER REFERENCES departments_update(dept_id)
+lab8(# ON DELETE CASCADE
+lab8(# ON UPDATE CASCADE
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO departments_update (dept_id, dept_name) VALUES
+lab8-# (300, 'HR');
+INSERT 0 1
+lab8=# INSERT INTO employees_combined_cascade (first_name, last_name, dept_id) VALUES
+lab8-# ('Syrgak', 'Alykov', 300);
+INSERT 0 1
+lab8=# SELECT * FROM employees_combined_cascade;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |     300
+(1 row)
+
+
+lab8=# UPDATE departments_update SET dept_id = 400 WHERE dept_id = 300;
+UPDATE 1
+lab8=# SELECT * FROM employees_combined_cascade;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+      1 | Syrgak     | Alykov    |     400
+(1 row)
+
+
+lab8=# DELETE FROM departments_update WHERE dept_id = 400;
+DELETE 1
+lab8=# SELECT * FROM employees_combined_cascade;
+ emp_id | first_name | last_name | dept_id
+--------+------------+-----------+---------
+(0 rows)
+
+
+lab8=# CREATE TABLE users (
+lab8(# user_id SERIAL PRIMARY KEY,
+lab8(# username VARCHAR(50) UNIQUE NOT NULL,
+lab8(# email VARCHAR(100) UNIQUE NOT NULL,
+lab8(# created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE user_profiles (
+lab8(# profile_id SERIAL PRIMARY KEY,
+lab8(# user_id INTEGER UNIQUE NOT NULL,
+lab8(# first_name VARCHAR(50),
+lab8(# last_name VARCHAR(50),
+lab8(# bio TEXT,
+lab8(# profile_picture_url VARCHAR(255),
+lab8(# FOREIGN KEY (user_id) REFERENCES users (user_id) ON DELETE CASCADE
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO users (username, email) VALUES
+lab8-# ('Alice Johnson', 'alice@alatoo.edu.kg'),
+lab8-# ('Bob Smith', 'bob@alatoo.edu.kg'),
+lab8-# ('Carol Davis', 'carol@alatoo.edu.kg');
+INSERT 0 3
+lab8=# SELECT * FROM users;
+ user_id |   username    |        email        |         created_at
+---------+---------------+---------------------+----------------------------
+       1 | Alice Johnson | alice@alatoo.edu.kg | 2026-09-30 23:36:40.978371
+       2 | Bob Smith     | bob@alatoo.edu.kg   | 2026-09-30 23:36:40.978371
+       3 | Carol Davis   | carol@alatoo.edu.kg | 2026-09-30 23:36:40.978371
+(3 rows)
+
+
+lab8=# INSERT INTO user_profiles (user_id, first_name, last_name, bio) VALUES
+lab8-# ('Alice', 'Johnson', 'Engineering'),
+lab8-# ('Bob', 'Smith', 'Marketing'),
+lab8-# ('Carol', 'Davis', 'HR');
+ERROR:  INSERT has more target columns than expressions
+LINE 1: ...TO user_profiles (user_id, first_name, last_name, bio) VALUE...
+                                                             ^
+lab8=# INSERT INTO user_profiles (user_id, first_name, last_name, bio) VALUES
+lab8-# (1, 'Alice', 'Johnson', 'Engineering'),
+lab8-# (2, 'Bob', 'Smith', 'Marketing'),
+lab8-# (3, 'Carol', 'Davis', 'HR');
+INSERT 0 3
+lab8=# SELECT * FROM user_profiles;
+ profile_id | user_id | first_name | last_name |     bio     | profile_picture_url
+------------+---------+------------+-----------+-------------+---------------------
+          1 |       1 | Alice      | Johnson   | Engineering |
+          2 |       2 | Bob        | Smith     | Marketing   |
+          3 |       3 | Carol      | Davis     | HR          |
+(3 rows)
+
+
+lab8=# INSERT INTO user_profiles (user_id, first_name, last_name) VALUES
+lab8-# (1, 'Syrgak', 'Alykov');
+ERROR:  duplicate key value violates unique constraint "user_profiles_user_id_key"
+DETAIL:  Key (user_id)=(1) already exists.
+lab8=# \dt
+                        List of tables
+ Schema |               Name               | Type  |  Owner
+--------+----------------------------------+-------+----------
+ public | departments                      | table | postgres
+ public | departments_default              | table | postgres
+ public | departments_update               | table | postgres
+ public | employees                        | table | postgres
+ public | employees_combined_cascade       | table | postgres
+ public | employees_foreign_key_tablelevel | table | postgres
+ public | employees_named_constraint       | table | postgres
+ public | employees_on_delete              | table | postgres
+ public | employees_on_update              | table | postgres
+ public | employees_set_default            | table | postgres
+ public | employees_set_null               | table | postgres
+ public | user_profiles                    | table | postgres
+ public | users                            | table | postgres
+(13 rows)
+
+
+lab8=# CREATE TABLE departments_onetomany (
+lab8(# dept_id SERIAL PRIMARY KEY,
+lab8(# dept_name VARCHAR(100) NOT NULL,
+lab8(# manager_name VARCHAR(100),
+lab8(# budget DECIMAL(10,2)
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE employees_onetomany (
+lab8(# emp_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR (50) NOT NULL,
+lab8(# last_name VARCHAR(50) NOT NULL,
+lab8(# position VARCHAR(100),
+lab8(# salary DECIMAL(10,2),
+lab8(# hire_date DATE DEFAULT CURRENT_DATE,
+lab8(# dept_id INTEGER NOT NULL,
+lab8(# FOREIGN KEY (dept_id) REFERENCES departments_onetomany (dept_id) ON DELETE RESTRICT
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE blog_posts (
+lab8(# post_id SERIAL PRIMARY KEY,
+lab8(# title VARCHAR (200) NOT NULL,
+lab8(# content TEXT,
+lab8(# author VARCHAR(100),
+lab8(# published_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE comments (
+lab8(# comment_id SERIAL PRIMARY KEY,
+lab8(# post_id INTEGER NOT NULL,
+lab8(# commenter_name VARCHAR(100),
+lab8(# comment_text TEXT NOT NULL,
+lab8(# comment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+lab8(# FOREIGN KEY (post_id) REFERENCES blog_posts (post_id) ON DELETE CASCADE
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO departments_onetomany (dept_name, manager_name, budget) VALUES
+lab8-# ('Engineering', 'Alice Johnson', 500000.00),
+lab8-# ('Marketing', 'Bob Wilson', 200000.00);
+INSERT 0 2
+lab8=# INSERT INTO employees_onetomany (first_name, last_name, position, salary, dept_id) VALUES
+lab8-# ('John', 'Smith', 'Software Engineer', 75000.00, 1),
+lab8-# ('Jane', 'Doe', 'Senior Developer', 85000.00, 1),
+lab8-# ('Mike', 'Brown', 'DevOps Engineer', 80000.00, 1),
+lab8-# ('Sarah', 'Davis', 'Marketing Specialist', 55000.00, 2);
+INSERT 0 4
+lab8=# SELECT d.dept_name, e.first_name, e.last_name, e.position FROM departments d
+lab8-# JOIN employees e ON d.dept_id = e.dept_id
+lab8-# ORDER BY d.dept_name, e.last_name;
+ERROR:  column e.position does not exist
+LINE 1: SELECT d.dept_name, e.first_name, e.last_name, e.position FR...
+                                                       ^
+lab8=# SELECT d.dept_name, e.first_name, e.last_name, e.position
+lab8-# FROM departments_onetomany d
+lab8-# JOIN employees_onetomany e ON d.dept_id = e.dept_id
+lab8-# ORDER BY d.dept_name, e.last_name;
+  dept_name  | first_name | last_name |       position
+-------------+------------+-----------+----------------------
+ Engineering | Mike       | Brown     | DevOps Engineer
+ Engineering | Jane       | Doe       | Senior Developer
+ Engineering | John       | Smith     | Software Engineer
+ Marketing   | Sarah      | Davis     | Marketing Specialist(4 rows)
+
+
+lab8=# \dt
+                        List of tables
+ Schema |               Name               | Type  |  Owner
+--------+----------------------------------+-------+----------
+ public | blog_posts                       | table | postgres
+ public | comments                         | table | postgres
+ public | departments                      | table | postgres
+ public | departments_default              | table | postgres
+ public | departments_onetomany            | table | postgres
+ public | departments_update               | table | postgres
+ public | employees                        | table | postgres
+ public | employees_combined_cascade       | table | postgres
+ public | employees_foreign_key_tablelevel | table | postgres
+ public | employees_named_constraint       | table | postgres
+ public | employees_on_delete              | table | postgres
+ public | employees_on_update              | table | postgres
+ public | employees_onetomany              | table | postgres
+ public | employees_set_default            | table | postgres
+ public | employees_set_null               | table | postgres
+ public | user_profiles                    | table | postgres
+ public | users                            | table | postgres
+(17 rows)
+
+
+lab8=# CREATE TABLE students (
+lab8(# student_id SERIAL PRIMARY KEY,
+lab8(# first_name VARCHAR(50) NOT NULL,
+lab8(# last_name VARCHAR (50) NOT NULL,
+lab8(# email VARCHAR (100) UNIQUE,
+lab8(# enrollment_date DATE DEFAULT CURRENT_DATE
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE courses (
+lab8(# course_id SERIAL PRIMARY KEY,
+lab8(# course_code VARCHAR(10) UNIQUE NOT NULL,
+lab8(# course_name VARCHAR(100) NOT NULL,
+lab8(# credits INTEGER NOT NULL,
+lab8(# );
+ERROR:  syntax error at or near ")"
+LINE 6: );
+        ^
+lab8=# CREATE TABLE courses (
+lab8(# course_id SERIAL PRIMARY KEY,
+lab8(# course_code VARCHAR(10) UNIQUE NOT NULL,
+lab8(# course_name VARCHAR(100) NOT NULL,
+lab8(# credits INTEGER NOT NULL,
+lab8(# instructor VARCHAR (100)
+lab8(# );
+CREATE TABLE
+lab8=# CREATE TABLE student_enrollments (
+lab8(# enrollment_id SERIAL PRIMARY KEY,
+lab8(# student_id INTEGER NOT NULL,
+lab8(# course_id INTEGER NOT NULL,
+lab8(# enrollment_date DATE DEFAULT CURRENT_DATE,
+lab8(# grade CHAR(2),
+lab8(#
+lab8(# FOREIGN KEY (student_id) REFERENCES students (student_id) ON DELETE CASCADE,
+lab8(# FOREIGN KEY (course_id) REFERENCES courses (course_id) ON DELETE CASCADE,
+lab8(#
+lab8(# UNIQUE(student_id, course_id)
+lab8(# );
+CREATE TABLE
+lab8=# INSERT INTO students (first_name, last_name, email) VALUES
+lab8-# ('Alice', 'Johnson', 'alice@university.edu'),
+lab8-# ('Bob', 'Smith', 'bob@university.edu'),
+lab8-# ('Carol', 'Wilson', 'carol@university.edu');
+INSERT 0 3
+lab8=# INSERT INTO courses (course_code, course_name, credits, instructor) VALUES
+lab8-# ('CS101', 'Introduction to Programming', 3, 'Dr. Brown'),
+lab8-# ('CS201', 'Data Structures', 4, 'Dr. Davis'),
+lab8-# ('MATH101', 'Calculus I', 4, 'Dr. Wilson');
+INSERT 0 3
+lab8=# INSERT INTO student_enrollments (student_id, course_id, grade) VALUES
+lab8-# (1, 1, 'A'),
+lab8-# (1, 2, 'B+'),
+lab8-# (2, 1, 'A-'),
+lab8-# (2, 3, '8'),
+lab8-# (3, 2, 'A'),
+lab8-# (3, 3, 'A-');
+INSERT 0 6
+lab8=# SELECT
+lab8-# s.first_name || ' ' || s.last_name AS student_name,
+lab8-# c.course_code,
+lab8-# c.course_name,
+lab8-# se.grade,
+lab8-# se.enrollment_date
+lab8-# FROM students s
+lab8-# JOIN student_enrollments se ON s.student_id = se.student_id
+lab8-# JOIN courses c ON se.course_id = c.course_id
+lab8-# ORDER BY s.last_name, c.course_code;
+ student_name  | course_code |         course_name         | grade | enrollment_date
+---------------+-------------+-----------------------------+-------+-----------------
+ Alice Johnson | CS101       | Introduction to Programming | A     | 2026-10-01
+ Alice Johnson | CS201       | Data Structures             | B+    | 2026-10-01
+ Bob Smith     | CS101       | Introduction to Programming | A-    | 2026-10-01
+ Bob Smith     | MATH101     | Calculus I                  | 8     | 2026-10-01
+ Carol Wilson  | CS201       | Data Structures             | A     | 2026-10-01
+ Carol Wilson  | MATH101     | Calculus I                  | A-    | 2026-10-01
+(6 rows)
+
+       SELECT s.first_name, s.last_name, se.grade
+lab8-#
+lab8-# FROM students s;
+ERROR:  missing FROM-clause entry for table "se"
+LINE 1: SELECT s.first_name, s.last_name, se.grade
+                                          ^
+lab8=# SELECT s.first_name, s.last_name, se.grade
+lab8-# FROM students s
+lab8-# JOIN student_enrollments se ON s.student_id = se.student_id
+lab8-# JOIN courses c ON se.course_id = c.course_id
+lab8-# WHERE c.course_code = 'CS101';
+ first_name | last_name | grade
+------------+-----------+-------
+ Alice      | Johnson   | A
+ Bob        | Smith     | A-
+(2 rows)
+
+
+lab8=# SELECT c.course_code, c.course_name, c.credits, se.grade
+lab8-# FROM courses c
+lab8-# JOIN student_enrollments se ON c.course_id= se.course_id
+lab8-# JOIN students s ON se.student_id = s.student_id
+lab8-# WHERE s.email = 'alice@university.edu';
+ course_code |         course_name         | credits | grade
+-------------+-----------------------------+---------+-------
+ CS101       | Introduction to Programming |       3 | A
+ CS201       | Data Structures             |       4 | B+
+(2 rows)
+
+
+lab8=# \dt
+                        List of tables
+ Schema |               Name               | Type  |  Owner
+--------+----------------------------------+-------+----------
+ public | blog_posts                       | table | postgres
+ public | comments                         | table | postgres
+ public | courses                          | table | postgres
+ public | departments                      | table | postgres
+ public | departments_default              | table | postgres
+ public | departments_onetomany            | table | postgres
+ public | departments_update               | table | postgres
+ public | employees                        | table | postgres
+ public | employees_combined_cascade       | table | postgres
+ public | employees_foreign_key_tablelevel | table | postgres
+ public | employees_named_constraint       | table | postgres
+ public | employees_on_delete              | table | postgres
+ public | employees_on_update              | table | postgres
+ public | employees_onetomany              | table | postgres
+ public | employees_set_default            | table | postgres
+ public | employees_set_null               | table | postgres
+ public | student_enrollments              | table | postgres
+ public | students                         | table | postgres
+ public | user_profiles                    | table | postgres
+ public | users                            | table | postgres
+(20 rows)
+
+
+lab8=# \q
+
+
