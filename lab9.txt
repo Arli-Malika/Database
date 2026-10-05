@@ -1,0 +1,578 @@
+PS C:\WINDOWS\System32> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab9;
+CREATE DATABASE
+postgres=# \c lab9
+You are now connected to database "lab9" as user "postgres".
+lab9=# CREATE TABLE students (
+lab9(# student_id SERIAL PRIMARY KEY,
+lab9(# first_name VARCHAR(50) NOT NULL,
+lab9(# email VARCHAR(100) UNIQUE NOT NULL,
+lab9(# DateOfBirth DATE,
+lab9(# faculty VARCHAR(100)
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE course (
+lab9(# course_id SERIAL PRIMARY KEY,
+lab9(# course_name VARCHAR(100) NOT NULL,
+lab9(# credits INTEGER NOT NULL,
+lab9(# description TEXT
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE professor (
+lab9(# professor_id SERIAL PRIMARY KEY,
+lab9(# first_name VARCHAR(50) NOT NULL,
+lab9(# last_name VARCHAR(50) NOT NULL,
+lab9(# department VARCHAR(100),
+lab9(# email VARCHAR(100) UNIQUE NOT NULL
+lab9(# );
+CREATE TABLE
+lab9=# ALTER TABLE course ADD COLUMN professor_id INTEGER;
+ALTER TABLE
+lab9=# ALTER TABLE course ADD CONSTRAINT fk_course_professor FOREIGN KEY (professor_id) REFERENCES professor(professor_id);
+ALTER TABLE
+lab9=# \dt
+            List of tables
+ Schema |   Name    | Type  |  Owner
+--------+-----------+-------+----------
+ public | course    | table | postgres
+ public | professor | table | postgres
+ public | students  | table | postgres
+(3 rows)
+
+
+lab9=# CREATE TABLE enrollment (
+lab9(# student_id INTEGER,
+lab9(# course_id INTEGER,
+lab9(# enrollment_date DATE,
+lab9(# PRIMARY KEY (student_id, course_id),
+lab9(#  FOREIGN KEY (student_id) REFERENCES students(student_id),
+lab9(# FOREIGN KEY (course_id) REFERENCES course(course_id)
+lab9(# );
+CREATE TABLE
+lab9=# \d enrollment
+                 Table "public.enrollment"
+     Column      |  Type   | Collation | Nullable | Default -----------------+---------+-----------+----------+--------- student_id      | integer |           | not null |
+ course_id       | integer |           | not null |
+ enrollment_date | date    |           |          |
+Indexes:
+    "enrollment_pkey" PRIMARY KEY, btree (student_id, course_id)
+Foreign-key constraints:
+    "enrollment_course_id_fkey" FOREIGN KEY (course_id) REFERENCES course(course_id)
+    "enrollment_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(student_id)
+
+lab9=# INSERT INTO students (first_name, email, DateOfBirth, faculty)
+lab9-# VALUES
+lab9-# ('Alice', 'alice@alatoo.edu.kg', '2005-05-10', 'Software Engineering'),
+lab9-# ('Bob', 'bob@alatoo.edu.kg', '2006-04-22', 'Marketing'),
+lab9-# ('Carol', 'carol@alatoo.edu.kg', '2004-03-18', 'HR');
+INSERT 0 3
+lab9=# SELECT * FROM students;
+ student_id | first_name |        email        | dateofbirth |       faculty   
+------------+------------+---------------------+-------------+----------------------
+          1 | Alice      | alice@alatoo.edu.kg | 2005-05-10  | Software Engineering
+          2 | Bob        | bob@alatoo.edu.kg   | 2006-04-22  | Marketing
+          3 | Carol      | carol@alatoo.edu.kg | 2004-03-18  | HR
+(3 rows)
+
+
+lab9=# INSERT INTO course (course_name, credits, description) VALUES
+lab9-# ('Introduction to Programming', 3, 'Learn how to read and write code'),
+lab9-# ('Data Structures', 3, 'Learn how to efficiently manipulate data'),
+lab9-# ('Calculus I', 4, 'Limits and Derivatives');
+INSERT 0 3
+lab9=# INSERT INTO professor (first_name, last_name, department, email) VALUES
+lab9-# ('John', 'Smith', 'Computer Science', 'smith@alatoo.edu.kg'),
+lab9-# ('Jane', 'Doe', 'Mathematics', 'jane@alatoo.edu.kg');
+INSERT 0 2
+lab9=# SELECT * FROM professor;
+ professor_id | first_name | last_name |    department    |        email       
+--------------+------------+-----------+------------------+---------------------
+            1 | John       | Smith     | Computer Science | smith@alatoo.edu.kg            2 | Jane       | Doe       | Mathematics      | jane@alatoo.edu.kg
+(2 rows)
+
+
+lab9=# lab9=# SELECT * FROM course;
+ course_id |         course_name         | credits |               description                | professor_id
+-----------+-----------------------------+---------+------------------------------------------+--------------
+         1 | Introduction to Programming |       3 | Learn how to read and write code         |
+         2 | Data Structures             |       3 | Learn how to efficiently manipulate data |
+         3 | Calculus I                  |       4 | Limits and Derivatives                   |
+(3 rows)
+
+
+lab9=# UPDATE course SET professor_id = 1 WHERE course_id IN (1, 2);
+UPDATE 2
+lab9=# UPDATE course SET professor_id = 2 WHERE course_id = 3;
+UPDATE 1
+lab9=# SELECT course_id, course_name, professor_id FROM course;
+ course_id |         course_name         | professor_id
+-----------+-----------------------------+--------------
+         1 | Introduction to Programming |            1
+         2 | Data Structures             |            1
+         3 | Calculus I                  |            2
+(3 rows)
+
+lab9=# INSERT INTO enrollment (student_id, course_id, enrollment_date) VALUES
+lab9-# (1, 1, '2026-09-1'),
+lab9-# (1, 2, '2026-09-1'),
+lab9-# (2, 1, '2026-09-2'),
+lab9-# (2, 3, '2026-09-2'),
+lab9-# (3, 2, '2026-09-3'),
+lab9-# (3, 3, '2026-09-3');
+INSERT 0 6
+lab9=# SELECT * FROM enrollment;
+ student_id | course_id | enrollment_date
+------------+-----------+-----------------
+          1 |         1 | 2026-09-01
+          1 |         2 | 2026-09-01
+          2 |         1 | 2026-09-02
+          2 |         3 | 2026-09-02
+          3 |         2 | 2026-09-03
+          3 |         3 | 2026-09-03
+(6 rows)
+
+
+lab9=# SELECT students.first_name, course.course_name, enrollment.enrollment_date FROM enrollment
+lab9-# JOIN students ON enrollment.student_id = students.student_id
+lab9-# JOIN course ON enrollment.course_id = course.course_id;
+ first_name |         course_name         | enrollment_date
+------------+-----------------------------+-----------------
+ Alice      | Introduction to Programming | 2026-09-01
+ Alice      | Data Structures             | 2026-09-01
+ Bob        | Introduction to Programming | 2026-09-02
+ Bob        | Calculus I                  | 2026-09-02
+ Carol      | Data Structures             | 2026-09-03
+ Carol      | Calculus I                  | 2026-09-03
+(6 rows)
+
+
+lab9=# CREATE TABLE students_bad_1NF (
+lab9(# student_id INT PRIMARY KEY,
+lab9(# name VARCHAR(100),
+lab9(# phone_numbers TEXT
+lab9(# );
+CREATE TABLE
+lab9=# INSERT INTO students_bad_1NF VALUES
+lab9-# (1, 'Alice', '123-456-7890, 098-765-4321');
+INSERT 0 1
+lab9=# SELECT * FROM students_bad_1NF;
+ student_id | name  |       phone_numbers
+------------+-------+----------------------------
+          1 | Alice | 123-456-7890, 098-765-4321
+(1 row)
+
+
+lab9=# CREATE TABLE student_phones (
+lab9(#  student_id INTEGER,
+lab9(# phone_number VARCHAR(15),
+lab9(# phone_type VARCHAR(20),
+lab9(# PRIMARY KEY (student_id, phone_number),
+lab9(# FOREIGN KEY (student_id) REFERENCES students(student_id)
+lab9(# );
+CREATE TABLE
+lab9=# INSERT INTO student_phones (student_id, phone_number, phone_type) VALUES
+lab9-# (1, '126-777-1234', 'mobile'),
+lab9-# (1, '088-222-5678', 'home');
+INSERT 0 2
+lab9=# SELECT * FROM student_phones;
+ student_id | phone_number | phone_type
+------------+--------------+------------
+          1 | 126-777-1234 | mobile
+          1 | 088-222-5678 | home
+(2 rows)
+
+
+lab9=# CREATE TABLE enrollments_bad_2nf (
+lab9(# student_id INT,
+lab9(# course_id INT,
+lab9(# course_name VARCHAR(100),
+lab9(#  grade CHAR(2),
+lab9(# PRIMARY KEY (student_id, course_id)
+lab9(# );
+CREATE TABLE
+lab9=# INSERT INTO enrollments_bad_2nf VALUES
+lab9-# (1, 1, 'Introduction to Programming', 'B+'),
+lab9-# (2, 1, 'Introduction to Programming', 'C'),
+lab9-# (3, 1, 'Introduction to Programming', 'A');
+INSERT 0 3
+lab9=# SELECT * FROM enrollments_bad_2nf;
+ student_id | course_id |         course_name         | grade
+------------+-----------+-----------------------------+-------
+          1 |         1 | Introduction to Programming | B+
+          2 |         1 | Introduction to Programming | C
+          3 |         1 | Introduction to Programming | A
+(3 rows)
+
+lab9=# SELECT course_id, course_name, credits FROM course;
+ course_id |         course_name         | credits
+-----------+-----------------------------+---------
+         1 | Introduction to Programming |       3
+         2 | Data Structures             |       3
+         3 | Calculus I                  |       4
+(3 rows)
+
+
+lab9=# \d enrollment
+                 Table "public.enrollment"
+     Column      |  Type   | Collation | Nullable | Default
+-----------------+---------+-----------+----------+---------
+ student_id      | integer |           | not null |
+ course_id       | integer |           | not null |
+ enrollment_date | date    |           |          |
+Indexes:
+    "enrollment_pkey" PRIMARY KEY, btree (student_id, course_id)
+Foreign-key constraints:
+    "enrollment_course_id_fkey" FOREIGN KEY (course_id) REFERENCES course(course_id)
+    "enrollment_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(student_id)
+
+
+lab9=# SELECT enrollment.student_id, enrollment.course_id, course.course_name, enrollment.enrollment_date FROM enrollment
+lab9-# JOIN course ON enrollment.course_id = course.course_id ORDER BY enrollment.student_id;
+ student_id | course_id |         course_name         | enrollment_date
+------------+-----------+-----------------------------+-----------------
+          1 |         1 | Introduction to Programming | 2026-09-01
+          1 |         2 | Data Structures             | 2026-09-01
+          2 |         1 | Introduction to Programming | 2026-09-02
+          2 |         3 | Calculus I                  | 2026-09-02
+          3 |         2 | Data Structures             | 2026-09-03
+          3 |         3 | Calculus I                  | 2026-09-03
+(6 rows)
+
+
+lab9=# CREATE TABLE students_bad_3nf (
+lab9(# student_id INT PRIMARY KEY,
+lab9(# name VARCHAR(100),
+lab9(# department_id INT,
+lab9(# department_name VARCHAR(100)
+lab9(# );
+CREATE TABLE
+lab9=# INSERT INTO students_bad_3nf VALUES
+lab9-# (1, 'Alice', 1, 'Computer Science'),
+lab9-# (2, 'Bob', 1, 'Computer Science'),
+lab9-# (3, 'Carol', 2, 'Business');
+INSERT 0 3
+lab9=# SELECT * FROM students_bad_3nf;
+ student_id | name  | department_id | department_name
+------------+-------+---------------+------------------
+          1 | Alice |             1 | Computer Science
+          2 | Bob   |             1 | Computer Science
+          3 | Carol |             2 | Business
+(3 rows)
+
+
+lab9=# CREATE TABLE departments (
+lab9(# department_id INT PRIMARY KEY,
+lab9(# department_name VARCHAR(100),
+lab9(# department_head VARCHAR(100)
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE students_3nf (
+lab9(# student_id INT PRIMARY KEY,
+lab9(# name VARCHAR(100),
+lab9(# department_id INT,
+lab9(# FOREIGN KEY (department_id) REFERENCES departments(department_id)
+lab9(# );
+CREATE TABLE
+lab9=# INSERT INTO departments (department_id, department_name, department_head) VALUES
+lab9-# (1, 'Computer Science', 'John Smith'),
+lab9-# (2, 'Business', 'Jane Doe');
+INSERT 0 2
+lab9=# SELECT * FROM departments;
+ department_id | department_name  | department_head
+---------------+------------------+-----------------
+             1 | Computer Science | John Smith
+             2 | Business         | Jane Doe
+(2 rows)
+
+
+lab9=# INSERT INTO students_3nf (student_id, name, department_id) VALUES
+lab9-# (1, 'Alice', 1),
+lab9-# (2, 'Bob', 1),
+lab9-# (3, 'Carol', 2);
+INSERT 0 3
+lab9=# SELECT * FROM students_3nf;
+ student_id | name  | department_id
+------------+-------+---------------
+          1 | Alice |             1
+          2 | Bob   |             1
+          3 | Carol |             2
+(3 rows)
+
+
+lab9=# \d students_3nf
+                       Table "public.students_3nf"
+    Column     |          Type          | Collation | Nullable | Default
+---------------+------------------------+-----------+----------+---------
+ student_id    | integer                |           | not null |
+ name          | character varying(100) |           |          |
+ department_id | integer                |           |          |
+Indexes:
+    "students_3nf_pkey" PRIMARY KEY, btree (student_id)
+Foreign-key constraints:
+    "students_3nf_department_id_fkey" FOREIGN KEY (department_id) REFERENCES departments(department_id)
+
+
+lab9=# SELECT students_3nf.student_id, students_3nf.name, departments.department_name, departments.department_head FROM students_3nf
+lab9-# JOIN departments ON students_3nf.department_id = departments.department_id;
+ student_id | name  | department_name  | department_head
+------------+-------+------------------+-----------------
+          1 | Alice | Computer Science | John Smith
+          2 | Bob   | Computer Science | John Smith
+          3 | Carol | Business         | Jane Doe
+(3 rows)
+
+
+lab9=# INSERT INTO students_3nf (student_id, name, department_id) VALUES
+lab9-# (4, 'Alikhan', 100);
+ERROR:  insert or update on table "students_3nf" violates foreign key constraint "students_3nf_department_id_fkey"
+DETAIL:  Key (department_id)=(100) is not present in table "departments".
+lab9=# CREATE TABLE authors (
+lab9(# author_id SERIAL PRIMARY KEY,
+lab9(# first_name VARCHAR(50) NOT NULL,
+lab9(# last_name VARCHAR(50) NOT NULL,
+lab9(# birth_date DATE
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE books (
+lab9(# book_id SERIAL PRIMARY KEY,
+lab9(# title VARCHAR(200) NOT NULL,
+lab9(# isbn VARCHAR(13) UNIQUE,
+lab9(# publication_year INTEGER,
+lab9(# available_copies INTEGER DEFAULT 1
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE book_authors (
+lab9(# book_id INTEGER,
+lab9(# author_id INTEGER,
+lab9(# PRIMARY KEY (book_id, author_id),
+lab9(# FOREIGN KEY (book_id) REFERENCES books(book_id),
+lab9(# FOREIGN KEY (author_id) REFERENCES authors(author_id)
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE members (
+lab9(# member_id SERIAL PRIMARY KEY,
+lab9(# first_name VARCHAR(50) NOT NULL,
+lab9(# last_name VARCHAR(50) NOT NULL,
+lab9(# email VARCHAR(100) UNIQUE NOT NULL,
+lab9(# phone VARCHAR(15),
+lab9(# membership_date DATE DEFAULT CURRENT_DATE
+lab9(# );
+CREATE TABLE
+lab9=# CREATE TABLE loans (
+lab9(# loan_id SERIAL PRIMARY KEY,
+lab9(# member_id INTEGER NOT NULL,
+lab9(# book_id INTEGER NOT NULL,
+lab9(# loan_date DATE DEFAULT CURRENT_DATE,
+lab9(# due_date DATE NOT NULL,
+lab9(# return_date DATE,
+lab9(# late_fee DECIMAL(10,2) DEFAULT 0.00,
+lab9(# FOREIGN KEY (member_id) REFERENCES members(member_id),
+lab9(# FOREIGN KEY (book_id) REFERENCES books(book_id)
+lab9(# );
+CREATE TABLE
+lab9=# \dt
+                 List of tables
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | authors             | table | postgres
+ public | book_authors        | table | postgres
+ public | books               | table | postgres
+ public | course              | table | postgres
+ public | departments         | table | postgres
+ public | enrollment          | table | postgres
+ public | enrollments_bad_2nf | table | postgres
+ public | loans               | table | postgres
+ public | members             | table | postgres
+ public | professor           | table | postgres
+ public | student_phones      | table | postgres
+ public | students            | table | postgres
+ public | students_3nf        | table | postgres
+ public | students_bad_1nf    | table | postgres
+ public | students_bad_3nf    | table | postgres
+(15 rows)
+
+
+lab9=# INSERT INTO authors (first_name, last_name, birth_date) VALUES
+lab9-# ('Stephen', 'King', '1947-09-21'),
+lab9-# ('Jane', 'Austen', '1775-12-16'),
+lab9-# ('Neil', 'Gaiman', '1960-11-10');
+INSERT 0 3
+lab9=# SELECT * FROM authors;
+ author_id | first_name | last_name | birth_date
+-----------+------------+-----------+------------
+         1 | Stephen    | King      | 1947-09-21
+         2 | Jane       | Austen    | 1775-12-16
+         3 | Neil       | Gaiman    | 1960-11-10
+(3 rows)
+
+
+lab9=# INSERT INTO books (title, isbn, publication_year, available_copies) VALUES
+lab9-# ('The Shining', '9780307743657', 1977, 3),
+lab9-# ('Pride and Prejudice', '9780141439518', 1813, 2),
+lab9-# ('American Gods', '9780062572233', 2001, 4);
+INSERT 0 3
+lab9=# SELECT * FROM books;
+ book_id |        title        |     isbn      | publication_year | available_copies
+---------+---------------------+---------------+------------------+------------------
+       1 | The Shining         | 9780307743657 |             1977 |                3
+       2 | Pride and Prejudice | 9780141439518 |             1813 |                2
+       3 | American Gods       | 9780062572233 |             2001 |                4
+(3 rows)
+
+
+lab9=# INSERT INTO book_authors (book_id, author_id) VALUES
+lab9-# (1, 1),
+lab9-# (2, 2),
+lab9-# (3, 3);
+INSERT 0 3
+lab9=# SELECT * FROM book_authors;
+ book_id | author_id
+---------+-----------
+       1 |         1
+       2 |         2
+       3 |         3
+(3 rows)
+
+
+lab9=# SELECT books.title, authors.first_name, authors.last_name FROM book_authors
+lab9-# JOIN books ON book_authors.book_id = books.book_id
+lab9-# JOIN authors ON book_authors.author_id = authors.author_id;
+        title        | first_name | last_name
+---------------------+------------+-----------
+ The Shining         | Stephen    | King
+ Pride and Prejudice | Jane       | Austen
+ American Gods       | Neil       | Gaiman
+(3 rows)
+
+
+lab9=# INSERT INTO authors (first_name, last_name, birth_date)
+lab9-# VALUES
+lab9-# ('Terry', 'Pratchett', '1948-04-28');
+INSERT 0 1
+lab9=# INSERT INTO book_authors (book_id, author_id) VALUES
+lab9-# (3, 4);
+INSERT 0 1
+lab9=# SELECT * FROM book_authors;
+ book_id | author_id
+---------+-----------
+       1 |         1
+       2 |         2
+       3 |         3
+       3 |         4
+(4 rows)
+
+
+lab9=# SELECT books.title, authors.first_name, authors.last_name FROM book_authors
+lab9-# JOIN books ON book_authors.book_id = books.book_id
+lab9-# JOIN authors ON book_authors.author_id = authors.author_id
+lab9-# ORDER BY books.book_id;
+        title        | first_name | last_name
+---------------------+------------+-----------
+ The Shining         | Stephen    | King
+ Pride and Prejudice | Jane       | Austen
+ American Gods       | Neil       | Gaiman
+ American Gods       | Terry      | Pratchett
+(4 rows)
+
+
+lab9=# INSERT INTO members (first_name, last_name, email, phone) VALUES
+lab9-# ('Alice', 'Karimovna', 'alice@alatoo.edu.kg', '222-1234'),
+lab9-# ('Bob', 'Smith', 'bob@alatoo.edu.kg', '333-0345'),
+lab9-# ('Carol', 'Davis', 'carol@alatoo.edu.kg', '555-0876');
+INSERT 0 3
+lab9=# SELECT * FROM members;
+ member_id | first_name | last_name |        email        |  phone   | membership_date
+-----------+------------+-----------+---------------------+----------+-----------------
+         1 | Alice      | Karimovna | alice@alatoo.edu.kg | 222-1234 | 2026-10-05
+         2 | Bob        | Smith     | bob@alatoo.edu.kg   | 333-0345 | 2026-10-05
+         3 | Carol      | Davis     | carol@alatoo.edu.kg | 555-0876 | 2026-10-05
+(3 rows)
+
+
+lab9=# INSERT INTO loans (member_id, book_id, loan_date, due_date) VALUES
+lab9-# (1, 1, '2026-10-01', '2026-10-15'),
+lab9-# (1, 2, '2026-10-01', '2026-10-15'),
+lab9-# (2, 3, '2026-10-02', '2026-10-16');
+INSERT 0 3
+lab9=# SELECT * FROM loans;
+ loan_id | member_id | book_id | loan_date  |  due_date  | return_date | late_fee
+---------+-----------+---------+------------+------------+-------------+----------
+       1 |         1 |       1 | 2026-10-01 | 2026-10-15 |             |     0.00
+       2 |         1 |       2 | 2026-10-01 | 2026-10-15 |             |     0.00
+       3 |         2 |       3 | 2026-10-02 | 2026-10-16 |             |     0.00
+(3 rows)
+
+
+lab9=# SELECT members.first_name, members.last_name, books.title, loans.loan_date, loans.due_date, loans.return_date, loans.late_fee FROM loans
+lab9-# JOIN members ON loans.member_id = members.member_id
+lab9-# JOIN books ON loans.book_id = books.book_id ORDER BY loans.loan_id;
+ first_name | last_name |        title        | loan_date  |  due_date  | return_date | late_fee
+------------+-----------+---------------------+------------+------------+-------------+----------
+ Alice      | Karimovna | The Shining         | 2026-10-01 | 2026-10-15 |             |     0.00
+ Alice      | Karimovna | Pride and Prejudice | 2026-10-01 | 2026-10-15 |             |     0.00
+ Bob        | Smith     | American Gods       | 2026-10-02 | 2026-10-16 |             |     0.00
+(3 rows)
+
+
+lab9=# SELECT * FROM loans;
+ loan_id | member_id | book_id | loan_date  |  due_date  | return_date | late_fee
+---------+-----------+---------+------------+------------+-------------+----------
+       1 |         1 |       1 | 2026-10-01 | 2026-10-15 |             |     0.00
+       2 |         1 |       2 | 2026-10-01 | 2026-10-15 |             |     0.00
+       3 |         2 |       3 | 2026-10-02 | 2026-10-16 |             |     0.00
+(3 rows)
+
+
+lab9=# UPDATE loans SET return_date = '2026-10-10' WHERE loan_id = 2;
+UPDATE 1
+lab9=# SELECT * FROM loans WHERE loan_id = 2;
+ loan_id | member_id | book_id | loan_date  |  due_date  | return_date | late_fee
+---------+-----------+---------+------------+------------+-------------+----------
+       2 |         1 |       2 | 2026-10-01 | 2026-10-15 | 2026-10-10  |     0.00
+(1 row)
+
+
+lab9=# UPDATE loans SET return_date = '2026-10-18',
+lab9-# late_fee = 250.00
+lab9-# WHERE loan_id = 1;
+UPDATE 1
+lab9=# SELECT * FROM loans WHERE loan_id = 1;
+ loan_id | member_id | book_id | loan_date  |  due_date  | return_date | late_fee
+---------+-----------+---------+------------+------------+-------------+----------
+       1 |         1 |       1 | 2026-10-01 | 2026-10-15 | 2026-10-18  |   250.00
+(1 row)
+
+
+lab9=# \dt
+                 List of tables
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | authors             | table | postgres
+ public | book_authors        | table | postgres
+ public | books               | table | postgres
+ public | course              | table | postgres
+ public | departments         | table | postgres
+ public | enrollment          | table | postgres
+ public | enrollments_bad_2nf | table | postgres
+ public | loans               | table | postgres
+ public | members             | table | postgres
+ public | professor           | table | postgres
+ public | student_phones      | table | postgres
+ public | students            | table | postgres
+ public | students_3nf        | table | postgres
+ public | students_bad_1nf    | table | postgres
+ public | students_bad_3nf    | table | postgres
+(15 rows)
+
+
+lab9=# \q
+PS C:\WINDOWS\System32>
+
