@@ -1,0 +1,96 @@
+PS C:\WINDOWS\System32> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab10;
+CREATE DATABASE
+postgres=# \c lab9
+You are now connected to database "lab9" as user "postgres".
+lab9=# \dt
+                 List of tables
+ Schema |        Name         | Type  |  Owner
+--------+---------------------+-------+----------
+ public | authors             | table | postgres
+ public | book_authors        | table | postgres
+ public | books               | table | postgres
+ public | course              | table | postgres
+ public | departments         | table | postgres
+ public | enrollment          | table | postgres
+ public | enrollments_bad_2nf | table | postgres
+ public | loans               | table | postgres
+ public | members             | table | postgres
+ public | professor           | table | postgres
+ public | student_phones      | table | postgres
+ public | students            | table | postgres
+ public | students_3nf        | table | postgres
+ public | students_bad_1nf    | table | postgres
+ public | students_bad_3nf    | table | postgres
+(15 rows)
+
+
+lab9=# \d students
+                                          Table "public.students"
+   Column    |          Type          | Collation | Nullable |                   Default
+-------------+------------------------+-----------+----------+----------------------------------------------
+ student_id  | integer                |           | not null | nextval('students_student_id_seq'::regclass)
+ first_name  | character varying(50)  |           | not null |
+ email       | character varying(100) |           | not null |
+ dateofbirth | date                   |           |          |
+ faculty     | character varying(100) |           |          |
+Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+    "students_email_key" UNIQUE CONSTRAINT, btree (email)
+Referenced by:
+    TABLE "enrollment" CONSTRAINT "enrollment_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(student_id)
+    TABLE "student_phones" CONSTRAINT "student_phones_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(student_id)
+
+
+lab9=# \d enrollment
+                 Table "public.enrollment"
+     Column      |  Type   | Collation | Nullable | Default
+-----------------+---------+-----------+----------+---------
+ student_id      | integer |           | not null |
+ course_id       | integer |           | not null |
+ enrollment_date | date    |           |          |
+Indexes:
+    "enrollment_pkey" PRIMARY KEY, btree (student_id, course_id)
+Foreign-key constraints:
+    "enrollment_course_id_fkey" FOREIGN KEY (course_id) REFERENCES course(course_id)
+    "enrollment_student_id_fkey" FOREIGN KEY (student_id) REFERENCES students(student_id)
+
+
+lab9=# \d book_authors
+             Table "public.book_authors"
+  Column   |  Type   | Collation | Nullable | Default
+-----------+---------+-----------+----------+---------
+ book_id   | integer |           | not null |
+ author_id | integer |           | not null |
+Indexes:
+    "book_authors_pkey" PRIMARY KEY, btree (book_id, author_id)
+Foreign-key constraints:
+    "book_authors_author_id_fkey" FOREIGN KEY (author_id) REFERENCES authors(author_id)
+    "book_authors_book_id_fkey" FOREIGN KEY (book_id) REFERENCES books(book_id)
+
+
+lab9=# \d loans
+                                    Table "public.loans"
+   Column    |     Type      | Collation | Nullable |                Default
+-------------+---------------+-----------+----------+----------------------------------------
+ loan_id     | integer       |           | not null | nextval('loans_loan_id_seq'::regclass)
+ member_id   | integer       |           | not null |
+ book_id     | integer       |           | not null |
+ loan_date   | date          |           |          | CURRENT_DATE
+ due_date    | date          |           | not null |
+ return_date | date          |           |          |
+ late_fee    | numeric(10,2) |           |          | 0.00Indexes:
+    "loans_pkey" PRIMARY KEY, btree (loan_id)
+Foreign-key constraints:
+    "loans_book_id_fkey" FOREIGN KEY (book_id) REFERENCES books(book_id)
+    "loans_member_id_fkey" FOREIGN KEY (member_id) REFERENCES members(member_id)
+
+
