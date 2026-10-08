@@ -1,0 +1,117 @@
+PS C:\WINDOWS\System32> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab11;
+CREATE DATABASE
+postgres=# \c lab11;
+You are now connected to database "lab11" as user "postgres".
+lab11=# CREATE TABLE Students (
+lab11(#     student_id SERIAL PRIMARY KEY,
+lab11(#     first_name VARCHAR(50),
+lab11(#     last_name VARCHAR(50),
+lab11(#     birth_date DATE
+lab11(# );
+CREATE TABLE
+lab11=# INSERT INTO Students (first_name, last_name, birth_date)
+lab11-# VALUES ('Aibek', 'Sharshenov', '2002-05-12');
+INSERT 0 1
+lab11=# INSERT INTO Students (first_name, last_name, birth_date) VALUES
+lab11-# ('Ainura', 'Toktomamatova', '2001-09-23'),
+lab11-# ('Bakyt', 'Mamatov', '2003-01-15'),
+lab11-# ('Gulzat', 'Sultanova', '2002-07-30');
+INSERT 0 3
+lab11=# SELECT * FROM Students;
+ student_id | first_name |   last_name   | birth_date
+------------+------------+---------------+------------
+          1 | Aibek      | Sharshenov    | 2002-05-12
+          2 | Ainura     | Toktomamatova | 2001-09-23
+          3 | Bakyt      | Mamatov       | 2003-01-15
+          4 | Gulzat     | Sultanova     | 2002-07-30
+(4 rows)
+
+
+lab11=# UPDATE Students
+lab11-# SET birth_date = '2002-05-15'
+lab11-# WHERE first_name = 'Aibek' AND last_name = 'Sharshenov';
+UPDATE 1
+lab11=# SELECT * FROM Students;
+ student_id | first_name |   last_name   | birth_date
+------------+------------+---------------+------------
+          2 | Ainura     | Toktomamatova | 2001-09-23
+          3 | Bakyt      | Mamatov       | 2003-01-15
+          4 | Gulzat     | Sultanova     | 2002-07-30
+          1 | Aibek      | Sharshenov    | 2002-05-15
+(4 rows)
+
+
+lab11=# DELETE FROM Students
+lab11-# WHERE first_name = 'Gulzat' AND last_name = 'Sultanova';
+DELETE 1
+lab11=# DELETE FROM Students
+lab11-# WHERE birth_date < '2002-01-01';
+DELETE 1
+lab11=# SELECT * FROM Students;
+ student_id | first_name | last_name  | birth_date
+------------+------------+------------+------------
+          3 | Bakyt      | Mamatov    | 2003-01-15
+          1 | Aibek      | Sharshenov | 2002-05-15
+(2 rows)
+
+
+lab11=# \copy Students(first_name, last_name, birth_date) FROM 'C:/Users/99655/Documents/Database/students.csv' WITH (FORMAT csv, HEADER true, DELIMITER ',')
+COPY 3
+lab11=# SELECT * FROM Students;
+ student_id | first_name | last_name  | birth_date
+------------+------------+------------+------------
+          3 | Bakyt      | Mamatov    | 2003-01-15
+          1 | Aibek      | Sharshenov | 2002-05-15
+          5 | Nursultan  | Isakov     | 2002-04-10
+          6 | Meerim     | Bekova     | 2003-06-12
+          7 | Tilek      | Usubaliev  | 2001-11-05
+(5 rows)
+
+
+lab11=# UPDATE Students
+lab11-# SET last_name = 'Bekov'
+lab11-# WHERE last_name IN ('Uulu', 'Isakov');
+UPDATE 1
+lab11=# DELETE FROM Students
+lab11-# WHERE student_id IN (2, 3, 5);
+DELETE 2
+lab11=# SELECT * FROM Students;
+ student_id | first_name | last_name  | birth_date
+------------+------------+------------+------------
+          1 | Aibek      | Sharshenov | 2002-05-15
+          6 | Meerim     | Bekova     | 2003-06-12
+          7 | Tilek      | Usubaliev  | 2001-11-05
+(3 rows)
+
+
+lab11=# \dt
+            List of tables
+ Schema |   Name   | Type  |  Owner
+--------+----------+-------+----------
+ public | students | table | postgres
+(1 row)
+
+
+lab11=# \d students
+                                         Table "public.students"
+   Column   |         Type          | Collation | Nullable |                   Default
+------------+-----------------------+-----------+----------+----------------------------------------------
+ student_id | integer               |           | not null | nextval('students_student_id_seq'::regclass)
+ first_name | character varying(50) |           |          |
+ last_name  | character varying(50) |           |          |
+ birth_date | date                  |           |          |
+Indexes:
+    "students_pkey" PRIMARY KEY, btree (student_id)
+
+
+lab11=# \q
+PS C:\WINDOWS\System32>
