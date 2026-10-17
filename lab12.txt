@@ -1,0 +1,412 @@
+PS C:\WINDOWS\System32> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab12;
+CREATE DATABASE
+postgres=# \c lab12
+You are now connected to database "lab12" as user "postgres".
+lab12=# CREATE TABLE employees (
+lab12(# employees_id SERIAL PRIMARY KEY,
+lab12(# employees_name VARCHAR(100),
+lab12(# department_id INTEGER,
+lab12(# department VARCHAR(50),
+lab12(# salary NUMERIC(10,2)
+lab12(# );
+CREATE TABLE
+lab12=# INSERT INTO employees (employees_name, department, department_id, salary)
+lab12-# VALUES
+lab12-# ('Ainura', 'Marketing', 3, 45000),
+lab12-# ('Bakyt', 'HR', 5, 55000),
+lab12-# ('Gulzat', 'Engineering', 3, 50000);
+INSERT 0 3
+lab12=# SELECT * FROM employees;
+ employees_id | employees_name | department_id | department  |  salary
+--------------+----------------+---------------+-------------+----------
+            1 | Ainura         |             3 | Marketing   | 45000.00
+            2 | Bakyt          |             5 | HR          | 55000.00
+            3 | Gulzat         |             3 | Engineering | 50000.00
+(3 rows)
+
+
+lab12=# CREATE TABLE products (
+lab12(# product_id SERIAL PRIMARY KEY,
+lab12(# product_name VARCHAR(100),
+lab12(# price NUMERIC(10,2)
+lab12(# );
+CREATE TABLE
+lab12=# INSERT INTO products (product_name, price) VALUES
+lab12-# ('Apple', 20),
+lab12-# ('Cake', 850),
+lab12-# ('Juice', 120);
+INSERT 0 3
+lab12=# CREATE TABLE customers (
+lab12(# customer_id SERIAL PRIMARY KEY,
+lab12(# customer_name VARCHAR(100)
+lab12(# );
+CREATE TABLE
+lab12=# INSERT INTO customers (customer_name) VALUES
+lab12-# (' Aibek'),
+lab12-# ('Mamat'),
+lab12-# ('Alikhan');
+INSERT 0 3
+lab12=# CREATE TABLE users (
+lab12(# user_id SERIAL PRIMARY KEY,
+lab12(# email VARCHAR(100)
+lab12(# );
+CREATE TABLE
+lab12=# INSERT INTO users (email)
+lab12-# VALUES
+lab12-# ('alice@alatoo.edu.kg'),
+lab12-# ('bob@alatoo.edu.kg'),
+lab12-# ('carol@alatoo.edu.kg');
+INSERT 0 3
+lab12=# CREATE TABLE sales (
+lab12(# sale_id SERIAL PRIMARY KEY,
+lab12(# employee_id INTEGER REFERENCES employees(employees_id),
+lab12(# amount NUMERIC(10,2)
+lab12(# );
+CREATE TABLE
+lab12=# INSERT INTO sales (employee_id, amount) VALUES
+lab12-# (1, 500),
+lab12-# (2, 600),
+lab12-# (3, 700);
+INSERT 0 3
+lab12=# \dt
+            List of tables
+ Schema |   Name    | Type  |  Owner
+--------+-----------+-------+----------
+ public | customers | table | postgres
+ public | employees | table | postgres
+ public | products  | table | postgres
+ public | sales     | table | postgres
+ public | users     | table | postgres
+(5 rows)
+
+
+lab12=# SELECT * FROM employees;
+ employees_id | employees_name | department_id | department  |  salary
+--------------+----------------+---------------+-------------+----------
+            1 | Ainura         |             3 | Marketing   | 45000.00
+            2 | Bakyt          |             5 | HR          | 55000.00
+            3 | Gulzat         |             3 | Engineering | 50000.00
+(3 rows)
+
+
+lab12=# SELECT employees_name, department FROM employees;
+ employees_name | department
+----------------+-------------
+ Ainura         | Marketing
+ Bakyt          | HR
+ Gulzat         | Engineering
+(3 rows)
+
+
+lab12=# SELECT employees_name, salary, salary * 0.10 AS potential_bonus
+lab12-# FROM employees;
+ employees_name |  salary  | potential_bonus
+----------------+----------+-----------------
+ Ainura         | 45000.00 |       4500.0000
+ Bakyt          | 55000.00 |       5500.0000
+ Gulzat         | 50000.00 |       5000.0000
+(3 rows)
+
+
+lab12=# SELECT employees_name, salary
+lab12-# FROM employees
+lab12-# WHERE department = 'Marketing';
+ employees_name |  salary
+----------------+----------
+ Ainura         | 45000.00
+(1 row)
+
+
+lab12=#lab12=# INSERT INTO employees (employees_name, department, department_id, salary) VALUES
+lab12-# ('Malika', 'Engineering', 3, 120000),
+lab12-# ('Karim', 'Sales', 7, 110000);
+INSERT 0 2
+lab12=# SELECT employees_name
+lab12-# FROM employees
+lab12-# WHERE salary > 75000 AND department = 'Engineering';
+ employees_name
+----------------
+ Malika
+(1 row)
+
+lab12=# SELECT employees_name, salary, salary * 0.10 AS potential_bonus
+lab12-# FROM employees;
+ employees_name |  salary   | potential_bonus
+----------------+-----------+-----------------
+ Ainura         |  45000.00 |       4500.0000
+ Bakyt          |  55000.00 |       5500.0000
+ Gulzat         |  50000.00 |       5000.0000
+ Malika         | 120000.00 |      12000.0000
+ Karim          | 110000.00 |      11000.0000
+(5 rows)
+
+
+lab12=# SELECT product_name, price
+lab12-# FROM products
+lab12-# WHERE price BETWEEN 20 AND 50;
+ product_name | price
+--------------+-------
+ Apple        | 20.00
+(1 row)
+
+
+lab12=# INSERT INTO customers (customer_name) VALUES
+lab12-# ('Brad'),
+lab12-# ('Brandon');
+INSERT 0 2
+lab12=# SELECT customer_name
+lab12-# FROM customers
+lab12-# WHERE customer_name LIKE 'Bra%';
+ customer_name
+---------------
+ Brad
+ Brandon
+(2 rows)
+
+
+lab12=# INSERT INTO products (product_name, price) VALUES
+lab12-# ('Strawberry', 25),
+lab12-# ('Blueberry', 60);
+INSERT 0 2
+lab12=# SELECT product_name
+lab12-# FROM products
+lab12-# WHERE product_name LIKE '%berry';
+ product_name
+--------------
+ Strawberry
+ Blueberry
+(2 rows)
+
+
+lab12=# INSERT INTO users (email) VALUES
+lab12-# ('alice@gmail.com'),
+lab12-# ('ARSEN@GMAIL.COM');
+INSERT 0 2
+lab12=# SELECT email
+lab12-# FROM users
+lab12-# WHERE email ILIKE '%@gmail.com';
+      email
+-----------------
+ alice@gmail.com
+ ARSEN@GMAIL.COM
+(2 rows)
+
+
+lab12=# SELECT employees_name
+lab12-# FROM employees
+lab12-# WHERE employees_name ~ '^[AB]';
+ employees_name
+----------------
+ Ainura
+ Bakyt
+(2 rows)
+
+
+lab12=# SELECT email
+lab12-# FROM users
+lab12-# WHERE email ~* '^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$';
+        email
+---------------------
+ alice@alatoo.edu.kg
+ bob@alatoo.edu.kg
+ carol@alatoo.edu.kg
+ alice@gmail.com
+ ARSEN@GMAIL.COM
+(5 rows)
+
+
+lab12=# SELECT employees_name
+lab12-# FROM employees
+lab12-# WHERE employees_name !~ '^[AB]';
+ employees_name
+----------------
+ Gulzat
+ Malika
+ Karim
+(3 rows)
+
+
+lab12=# SELECT email
+lab12-# FROM users
+lab12-# WHERE email !~* '@gmail\.com$';
+        email
+---------------------
+ alice@alatoo.edu.kg
+ bob@alatoo.edu.kg
+ carol@alatoo.edu.kg
+(3 rows)
+
+
+lab12=# SELECT employees_name, department
+lab12-# FROM employees
+lab12-# WHERE department_id IN (3, 5, 7);
+ employees_name | department
+----------------+-------------
+ Ainura         | Marketing
+ Bakyt          | HR
+ Gulzat         | Engineering
+ Malika         | Engineering
+ Karim          | Sales
+(5 rows)
+
+
+lab12=# SELECT employees_id, employees_name
+lab12-# FROM employees
+lab12-# ORDER BY employees_id;
+ employees_id | employees_name
+--------------+----------------
+            1 | Ainura
+            2 | Bakyt
+            3 | Gulzat
+            4 | Malika
+            5 | Karim
+(5 rows)
+
+
+lab12=# INSERT INTO sales (employee_id, amount) VALUES
+lab12-# (4, 1500),
+lab12-# (5, 2000);
+INSERT 0 2
+lab12=# SELECT employees_name
+lab12-# FROM employees
+lab12-# WHERE employees_id IN (SELECT employee_id FROM sales WHERE amount > 1000);
+ employees_name
+----------------
+ Malika
+ Karim
+(2 rows)
+
+
+lab12=# SELECT employees_name
+lab12-# FROM employees e
+lab12-# WHERE EXISTS (
+lab12(#     SELECT 1
+lab12(#     FROM sales s
+lab12(#     WHERE s.employee_id = e.employees_id AND s.amount > 1000
+lab12(# );
+ employees_name
+----------------
+ Malika
+ Karim
+(2 rows)
+
+
+lab12=# SELECT employees_id, employees_name, salary
+lab12-# FROM employees
+lab12-# ORDER BY employees_id;
+ employees_id | employees_name |  salary
+--------------+----------------+-----------
+            1 | Ainura         |  45000.00
+            2 | Bakyt          |  55000.00
+            3 | Gulzat         |  50000.00
+            4 | Malika         | 120000.00
+            5 | Karim          | 110000.00
+(5 rows)
+
+
+lab12=# SELECT employees_name, salary,
+lab12-#     CASE
+lab12-#         WHEN salary > 100000 THEN 'Senior'
+lab12-#         WHEN salary BETWEEN 60000 AND 100000 THEN 'Mid-Level'
+lab12-#         ELSE 'Junior'
+lab12-#     END AS employee_level
+lab12-# FROM employees;
+ employees_name |  salary   | employee_level
+----------------+-----------+----------------
+ Ainura         |  45000.00 | Junior
+ Bakyt          |  55000.00 | Junior
+ Gulzat         |  50000.00 | Junior
+ Malika         | 120000.00 | Senior
+ Karim          | 110000.00 | Senior
+(5 rows)
+
+
+lab12=# UPDATE employees
+lab12-# SET salary = 80000
+lab12-# WHERE employees_id = 5 AND employees_name = 'Karim';
+UPDATE 1
+lab12=# SELECT employees_name, salary,
+lab12-#     CASE
+lab12-#         WHEN salary > 100000 THEN 'Senior'
+lab12-#         WHEN salary BETWEEN 60000 AND 100000 THEN 'Mid-Level'
+lab12-#         ELSE 'Junior'
+lab12-#     END AS employee_level
+lab12-# FROM employees;
+ employees_name |  salary   | employee_level
+----------------+-----------+----------------
+ Ainura         |  45000.00 | Junior
+ Bakyt          |  55000.00 | Junior
+ Gulzat         |  50000.00 | Junior
+ Malika         | 120000.00 | Senior
+ Karim          |  80000.00 | Mid-Level
+(5 rows)
+
+
+lab12=# SELECT
+lab12-#     department,
+lab12-#     AVG(salary) AS avg_salary
+lab12-# FROM employees
+lab12-# GROUP BY department;
+ department  |     avg_salary
+-------------+--------------------
+ Marketing   | 45000.000000000000
+ Engineering | 85000.000000000000
+ Sales       | 80000.000000000000
+ HR          | 55000.000000000000
+(4 rows)
+
+
+lab12=# WITH department_averages AS (
+lab12(#     SELECT
+lab12(#         department,
+lab12(#         AVG(salary) AS avg_salary
+lab12(#     FROM employees
+lab12(#     GROUP BY department
+lab12(# )
+lab12-# SELECT
+lab12-#     e.employees_name,
+lab12-#     e.salary,
+lab12-#     e.department,
+lab12-#     da.avg_salary
+lab12-# FROM employees e
+lab12-# JOIN department_averages da ON e.department = da.department
+lab12-# WHERE e.salary > da.avg_salary;
+ employees_name |  salary   | department  |     avg_salary
+----------------+-----------+-------------+--------------------
+ Malika         | 120000.00 | Engineering | 85000.000000000000
+(1 row)
+
+
+lab12=# SELECT * FROM employees;
+ employees_id | employees_name | department_id | department  |  salary
+--------------+----------------+---------------+-------------+-----------
+            1 | Ainura         |             3 | Marketing   |  45000.00
+            2 | Bakyt          |             5 | HR          |  55000.00
+            3 | Gulzat         |             3 | Engineering |  50000.00
+            4 | Malika         |             3 | Engineering | 120000.00
+            5 | Karim          |             7 | Sales       |  80000.00
+(5 rows)
+
+
+lab12=# \dt
+            List of tables
+ Schema |   Name    | Type  |  Owner
+--------+-----------+-------+----------
+ public | customers | table | postgres
+ public | employees | table | postgres
+ public | products  | table | postgres
+ public | sales     | table | postgres
+ public | users     | table | postgres
+(5 rows)
+
+
+lab12=# \q
