@@ -1,0 +1,561 @@
+PS C:\Users\99655> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab15;
+CREATE DATABASE
+postgres=# \c lab15
+You are now connected to database "lab15" as user "postgres".
+lab15=# CREATE TABLE employees (
+lab15(# employee_id SERIAL PRIMARY KEY,
+lab15(# first_name VARCHAR(50),
+lab15(# last_name VARCHAR(50),
+lab15(# department VARCHAR(50),
+lab15(# salary NUMERIC(10,2),
+lab15(# manager_id INTEGER REFERENCES employees(employee_id),
+lab15(# tenure INTEGER
+lab15(# );
+CREATE TABLE
+lab15=# INSERT INTO employees (first_name, last_name, department, salary, manager_id, tenure) VALUES
+lab15-# ('Ainura', 'Asanova', 'Management', 150000, NULL, 12);
+INSERT 0 1
+lab15=# INSERT INTO employees (first_name, last_name, department, salary, manager_id, tenure) VALUES
+lab15-# ('Bakyt', 'Osmonov', 'Engineering', 110000, 1, 8),
+lab15-# ('Gulzat', 'Ermekova', 'Engineering', 70000, 2, 4),
+lab15-# ('Malika', 'Arli', 'Engineering', 95000, 2, 3),
+lab15-# ('Karim', 'Alymov', 'Sales', 85000, 1, 7),
+lab15-# ('Aizada', 'Bekova', 'Sales', 65000, 5, 2),
+lab15-# ('Alice', 'Brown', 'Marketing', 80000, 1, 6),
+lab15-# ('Bob', 'Smith', 'Marketing', 60000, 7, 1);
+INSERT 0 7
+lab15=# SELECT * FROM employees;
+ employee_id | first_name | last_name | department  |  salary   | manager_id | tenure
+-------------+------------+-----------+-------------+-----------+------------+--------
+           1 | Ainura     | Asanova   | Management  | 150000.00 |            |     12
+           2 | Bakyt      | Osmonov   | Engineering | 110000.00 |          1 |      8
+           3 | Gulzat     | Ermekova  | Engineering |  70000.00 |          2 |      4
+           4 | Malika     | Arli      | Engineering |  95000.00 |          2 |      3
+           5 | Karim      | Alymov    | Sales       |  85000.00 |          1 |      7
+           6 | Aizada     | Bekova    | Sales       |  65000.00 |          5 |      2
+           7 | Alice      | Brown     | Marketing   |  80000.00 |          1 |      6
+           8 | Bob        | Smith     | Marketing   |  60000.00 |          7 |      1
+(8 rows)
+
+
+lab15=# CREATE TABLE orders (
+lab15(# order_id SERIAL PRIMARY KEY,
+lab15(# region_id INTEGER,
+lab15(# amount NUMERIC(12,2),
+lab15(# product_name VARCHAR(100),
+lab15(# status VARCHAR(50)
+lab15(# );
+CREATE TABLE
+lab15=# INSERT INTO orders (region_id, amount, product_name, status) VALUES
+lab15-# (1, 500000, 'Laptop', 'High Priority'),
+lab15-# (1, 700000, 'Mouse', 'Medium Priority'),
+lab15-# (2, 300000, 'Keyboard', 'Low Priority'),
+lab15-# (2, 900000, 'Laptop', 'High Priority'),
+lab15-# (3, 150000, 'Monitor', 'Medium Priority'),
+lab15-# (3, 200000, 'Mouse', 'Low Priority');
+INSERT 0 6
+lab15=# SELECT * FROM orders;
+ order_id | region_id |  amount   | product_name |     status      ----------+-----------+-----------+--------------+-----------------        1 |         1 | 500000.00 | Laptop       | High Priority
+        2 |         1 | 700000.00 | Mouse        | Medium Priority
+        3 |         2 | 300000.00 | Keyboard     | Low Priority
+        4 |         2 | 900000.00 | Laptop       | High Priority
+        5 |         3 | 150000.00 | Monitor      | Medium Priority
+        6 |         3 | 200000.00 | Mouse        | Low Priority
+(6 rows)
+
+
+lab15=# CREATE TABLE warehouse_1 (
+lab15(# product_id INTEGER,
+lab15(# product_name VARCHAR(100),
+lab15(# quantity INTEGER
+lab15(# );
+CREATE TABLE
+lab15=# CREATE TABLE warehouse_2 (
+lab15(# product_id INTEGER,
+lab15(# product_name VARCHAR(100),
+lab15(# quantity INTEGER
+lab15(# );
+CREATE TABLE
+lab15=# INSERT INTO warehouse_1 (product_id, product_name, quantity) VALUES
+lab15-# (1, 'Laptop', 10),
+lab15-# (2, 'Mouse', 0),
+lab15-# (3, 'Keyboard', 0),
+lab15-# (4, 'Monitor', 5);
+INSERT 0 4
+lab15=# INSERT INTO warehouse_2 (product_id, product_name, quantity) VALUES
+lab15-# (1, 'Laptop', 8),
+lab15-# (2, 'Mouse', 0),
+lab15-# (3, 'Keyboard', 7),
+lab15-# (5, 'Printer', 0);
+INSERT 0 4
+lab15=# SELECT * FROM warehouse_1;
+ product_id | product_name | quantity
+------------+--------------+----------
+          1 | Laptop       |       10
+          2 | Mouse        |        0
+          3 | Keyboard     |        0
+          4 | Monitor      |        5
+(4 rows)
+
+
+lab15=# SELECT * FROM warehouse_2;
+ product_id | product_name | quantity
+------------+--------------+----------
+          1 | Laptop       |        8
+          2 | Mouse        |        0
+          3 | Keyboard     |        7
+          5 | Printer      |        0
+(4 rows)
+
+
+lab15=# CREATE TABLE sales (
+lab15(# sale_id SERIAL PRIMARY KEY,
+lab15(# product_name VARCHAR(100),
+lab15(# year INTEGER,
+lab15(# sales_amount NUMERIC(10,2)
+lab15(# );
+CREATE TABLE
+lab15=# INSERT INTO sales (product_name, year, sales_amount) VALUES
+lab15-# ('Laptop', 2022, 50000),
+lab15-# ('Laptop', 2023, 65000),
+lab15-# ('Laptop', 2024, 80000),
+lab15-# ('Mouse', 2022, 10000),
+lab15-# ('Mouse', 2023, 15000),
+lab15-# ('Mouse', 2024, 20000),
+lab15-# ('Keyboard', 2022, 8000),
+lab15-# ('Keyboard', 2023, 12000),
+lab15-# ('Keyboard', 2024, 18000);
+INSERT 0 9
+lab15=# \dt
+             List of tables
+ Schema |    Name     | Type  |  Owner
+--------+-------------+-------+----------
+ public | employees   | table | postgres
+ public | orders      | table | postgres
+ public | sales       | table | postgres
+ public | warehouse_1 | table | postgres
+ public | warehouse_2 | table | postgres
+(5 rows)
+
+
+lab15=# SELECT first_name, last_name, salary
+lab15-# FROM employees
+lab15-# WHERE salary > (
+lab15(#     SELECT AVG(salary)  -- This scalar subquery returns a single value
+lab15(#     FROM employees
+lab15(# );
+ first_name | last_name |  salary
+------------+-----------+-----------
+ Ainura     | Asanova   | 150000.00
+ Bakyt      | Osmonov   | 110000.00
+ Malika     | Arli      |  95000.00
+(3 rows)
+
+
+lab15=# SELECT first_name, last_name, department, salary
+lab15-# FROM employees
+lab15-# WHERE (department, salary) = (
+lab15(# SELECT department, salary
+lab15(# FROM employees
+lab15(# WHERE employee_id = 4
+lab15(# );
+ first_name | last_name | department  |  salary
+------------+-----------+-------------+----------
+ Malika     | Arli      | Engineering | 95000.00
+(1 row)
+
+
+lab15=# SELECT first_name, last_name, department
+lab15-# FROM employees
+lab15-# WHERE department IN (
+lab15(# SELECT department
+lab15(# FROM employees
+lab15(# WHERE salary > 100000
+lab15(# );
+ first_name | last_name | department
+------------+-----------+-------------
+ Ainura     | Asanova   | Management
+ Bakyt      | Osmonov   | Engineering
+ Gulzat     | Ermekova  | Engineering
+ Malika     | Arli      | Engineering
+(4 rows)
+
+
+lab15=# WITH regional_sales AS (
+lab15(#     SELECT region_id, SUM(amount) AS total_sales
+lab15(#     FROM orders
+lab15(#     GROUP BY region_id
+lab15(# )
+lab15-# SELECT region_id, total_sales
+lab15-# FROM regional_sales
+lab15-# WHERE total_sales > 1000000;
+ region_id | total_sales
+-----------+-------------
+         2 |  1200000.00
+         1 |  1200000.00
+(2 rows)
+
+
+lab15=# WITH RECURSIVE org_chart AS (
+lab15(# SELECT
+lab15(# employee_id,
+lab15(# first_name,
+lab15(# last_name,
+lab15(# manager_id
+lab15(# FROM employees
+lab15(# WHERE manager_id IS NULL
+lab15(# UNION ALL
+lab15(# SELECT
+lab15(# e.employee_id,
+lab15(# e.first_name,
+lab15(# e.last_name,
+lab15(# e.manager_id
+lab15(# FROM employees e
+lab15(# INNER JOIN org_chart oc
+lab15(# ON e.manager_id = oc.employee_id
+lab15(# )
+lab15-# SELECT * FROM org_chart;
+ employee_id | first_name | last_name | manager_id
+-------------+------------+-----------+------------
+           1 | Ainura     | Asanova   |
+           2 | Bakyt      | Osmonov   |          1
+           5 | Karim      | Alymov    |          1
+           7 | Alice      | Brown     |          1
+           3 | Gulzat     | Ermekova  |          2
+           4 | Malika     | Arli      |          2
+           6 | Aizada     | Bekova    |          5
+           8 | Bob        | Smith     |          7
+(8 rows)
+
+
+lab15=# SELECT product_name FROM warehouse_1
+lab15-# UNION
+lab15-# SELECT product_name FROM warehouse_2;
+ product_name
+--------------
+ Printer
+ Mouse
+ Laptop
+ Keyboard
+ Monitor
+(5 rows)
+
+
+lab15=# SELECT product_name FROM warehouse_1
+lab15-# UNION ALL
+lab15-# SELECT product_name FROM warehouse_2;
+ product_name
+--------------
+ Laptop
+ Mouse
+ Keyboard
+ Monitor
+ Laptop
+ Mouse
+ Keyboard
+ Printer
+(8 rows)
+
+
+lab15=# SELECT product_id FROM warehouse_1 WHERE quantity = 0
+lab15-# INTERSECT
+lab15-# SELECT product_id FROM warehouse_2 WHERE quantity = 0;
+ product_id
+------------
+          2
+(1 row)
+
+
+lab15=# SELECT product_name FROM warehouse_1
+lab15-# EXCEPT
+lab15-# SELECT product_name FROM warehouse_2;
+ product_name
+--------------
+ Monitor
+(1 row)
+
+
+lab15=# SELECT
+lab15-#     first_name,
+lab15-#     last_name,
+lab15-#     department,
+lab15-#     salary,
+lab15-#     RANK() OVER (PARTITION BY department ORDER BY salary DESC) AS dept_salary_rank
+lab15-# FROM employees;
+ first_name | last_name | department  |  salary   | dept_salary_rank
+------------+-----------+-------------+-----------+------------------
+ Bakyt      | Osmonov   | Engineering | 110000.00 |                1
+ Malika     | Arli      | Engineering |  95000.00 |                2
+ Gulzat     | Ermekova  | Engineering |  70000.00 |                3
+ Ainura     | Asanova   | Management  | 150000.00 |                1
+ Alice      | Brown     | Marketing   |  80000.00 |                1
+ Bob        | Smith     | Marketing   |  60000.00 |                2
+ Karim      | Alymov    | Sales       |  85000.00 |                1
+ Aizada     | Bekova    | Sales       |  65000.00 |                2
+(8 rows)
+
+
+lab15=# SELECT
+lab15-#     first_name,
+lab15-#     department,
+lab15-#     salary,
+lab15-#     ROW_NUMBER() OVER (
+lab15(#         PARTITION BY department ORDER BY salary DESC
+lab15(#     ) AS row_number,
+lab15-#     RANK() OVER (
+lab15(#         PARTITION BY department ORDER BY salary DESC
+lab15(#     ) AS salary_rank,
+lab15-#     DENSE_RANK() OVER (
+lab15(#         PARTITION BY department ORDER BY salary DESC
+lab15(#     ) AS dense_rank
+lab15-# FROM employees;
+ first_name | department  |  salary   | row_number | salary_rank | dense_rank
+------------+-------------+-----------+------------+-------------+------------
+ Bakyt      | Engineering | 110000.00 |          1 |           1 |          1
+ Malika     | Engineering |  95000.00 |          2 |           2 |          2
+ Gulzat     | Engineering |  70000.00 |          3 |           3 |          3
+ Ainura     | Management  | 150000.00 |          1 |           1 |          1
+ Alice      | Marketing   |  80000.00 |          1 |           1 |          1
+ Bob        | Marketing   |  60000.00 |          2 |           2 |          2
+ Karim      | Sales       |  85000.00 |          1 |           1 |          1
+ Aizada     | Sales       |  65000.00 |          2 |           2 |          2
+(8 rows)
+
+
+lab15=# SELECT
+lab15-#     first_name,
+lab15-#     department,
+lab15-#     salary,
+lab15-#     SUM(salary) OVER (
+lab15(#         PARTITION BY department
+lab15(#     ) AS total_dept_salary,
+lab15-#     AVG(salary) OVER (
+lab15(#         PARTITION BY department
+lab15(#     ) AS avg_dept_salary
+lab15-# FROM employees;
+ first_name | department  |  salary   | total_dept_salary |   avg_dept_salary
+------------+-------------+-----------+-------------------+---------------------
+ Bakyt      | Engineering | 110000.00 |         275000.00 |  91666.666666666667
+ Gulzat     | Engineering |  70000.00 |         275000.00 |  91666.666666666667
+ Malika     | Engineering |  95000.00 |         275000.00 |  91666.666666666667
+ Ainura     | Management  | 150000.00 |         150000.00 | 150000.000000000000
+ Bob        | Marketing   |  60000.00 |         140000.00 |  70000.000000000000
+ Alice      | Marketing   |  80000.00 |         140000.00 |  70000.000000000000
+ Karim      | Sales       |  85000.00 |         150000.00 |  75000.000000000000
+ Aizada     | Sales       |  65000.00 |         150000.00 |  75000.000000000000
+(8 rows)
+
+
+lab15=# SELECT
+lab15-#     first_name,
+lab15-#     department,
+lab15-#     salary,
+lab15-#     LAG(salary) OVER (
+lab15(#         PARTITION BY department ORDER BY salary DESC
+lab15(#     ) AS previous_salary,
+lab15-#     LEAD(salary) OVER (
+lab15(#         PARTITION BY department ORDER BY salary DESC
+lab15(#     ) AS next_salary
+lab15-# FROM employees;
+ first_name | department  |  salary   | previous_salary | next_salary
+------------+-------------+-----------+-----------------+-------------
+ Bakyt      | Engineering | 110000.00 |                 |    95000.00
+ Malika     | Engineering |  95000.00 |       110000.00 |    70000.00
+ Gulzat     | Engineering |  70000.00 |        95000.00 |          
+ Ainura     | Management  | 150000.00 |                 |          
+ Alice      | Marketing   |  80000.00 |                 |    60000.00
+ Bob        | Marketing   |  60000.00 |        80000.00 |          
+ Karim      | Sales       |  85000.00 |                 |    65000.00
+ Aizada     | Sales       |  65000.00 |        85000.00 |          
+(8 rows)
+
+
+lab15=# SELECT
+lab15-#     product_name,
+lab15-#     SUM(CASE WHEN year = 2022 THEN sales_amount ELSE 0 END) AS year_2022,
+lab15-#     SUM(CASE WHEN year = 2023 THEN sales_amount ELSE 0 END) AS year_2023,
+lab15-#     SUM(CASE WHEN year = 2024 THEN sales_amount ELSE 0 END) AS year_2024
+lab15-# FROM sales
+lab15-# GROUP BY product_name;
+ product_name | year_2022 | year_2023 | year_2024
+--------------+-----------+-----------+-----------
+ Mouse        |  10000.00 |  15000.00 |  20000.00
+ Keyboard     |   8000.00 |  12000.00 |  18000.00
+ Laptop       |  50000.00 |  65000.00 |  80000.00
+(3 rows)
+
+
+lab15=# CREATE TABLE pivoted_sales AS
+lab15-# SELECT
+lab15-#     product_name,
+lab15-#     SUM(CASE WHEN year = 2022 THEN sales_amount ELSE 0 END) AS year_2022,
+lab15-#     SUM(CASE WHEN year = 2023 THEN sales_amount ELSE 0 END) AS year_2023,
+lab15-#     SUM(CASE WHEN year = 2024 THEN sales_amount ELSE 0 END) AS year_2024
+lab15-# FROM sales
+lab15-# GROUP BY product_name;
+SELECT 3
+lab15=# SELECT * FROM pivoted_sales;
+ product_name | year_2022 | year_2023 | year_2024
+--------------+-----------+-----------+-----------
+ Mouse        |  10000.00 |  15000.00 |  20000.00
+ Keyboard     |   8000.00 |  12000.00 |  18000.00
+ Laptop       |  50000.00 |  65000.00 |  80000.00
+(3 rows)
+
+
+lab15=# SELECT product_name, '2022' AS year, year_2022 AS sales_amount FROM pivoted_sales
+lab15-# UNION ALL
+lab15-# SELECT product_name, '2023' AS year, year_2023 AS sales_amount FROM pivoted_sales
+lab15-# UNION ALL
+lab15-# SELECT product_name, '2024' AS year, year_2024 AS sales_amount FROM pivoted_sales
+lab15-# ORDER BY product_name, year;
+ product_name | year | sales_amount
+--------------+------+--------------
+ Keyboard     | 2022 |      8000.00
+ Keyboard     | 2023 |     12000.00
+ Keyboard     | 2024 |     18000.00
+ Laptop       | 2022 |     50000.00
+ Laptop       | 2023 |     65000.00
+ Laptop       | 2024 |     80000.00
+ Mouse        | 2022 |     10000.00
+ Mouse        | 2023 |     15000.00
+ Mouse        | 2024 |     20000.00
+(9 rows)
+
+
+lab15=# SELECT
+lab15-#     employee_id,
+lab15-#     SUM(salary) OVER (PARTITION BY department) AS total_dept_salary,
+lab15-#     AVG(salary) FILTER (WHERE tenure > 5) OVER () AS avg_salary_senior
+lab15-# FROM employees;
+ employee_id | total_dept_salary |  avg_salary_senior
+-------------+-------------------+---------------------
+           2 |         275000.00 | 106250.000000000000
+           3 |         275000.00 | 106250.000000000000
+           4 |         275000.00 | 106250.000000000000
+           1 |         150000.00 | 106250.000000000000
+           8 |         140000.00 | 106250.000000000000
+           7 |         140000.00 | 106250.000000000000
+           5 |         150000.00 | 106250.000000000000
+           6 |         150000.00 | 106250.000000000000
+(8 rows)
+
+
+lab15=# SELECT product_name, status
+lab15-# FROM orders
+lab15-# ORDER BY
+lab15-#     CASE status
+lab15-#         WHEN 'High Priority' THEN 1
+lab15-#         WHEN 'Medium Priority' THEN 2
+lab15-#         WHEN 'Low Priority' THEN 3
+lab15-#         ELSE 4
+lab15-#     END;
+ product_name |     status
+--------------+-----------------
+ Laptop       | High Priority
+ Laptop       | High Priority
+ Mouse        | Medium Priority
+ Monitor      | Medium Priority
+ Keyboard     | Low Priority
+ Mouse        | Low Priority
+(6 rows)
+
+
+lab15=# EXPLAIN
+lab15-# SELECT first_name, last_name, salary
+lab15-# FROM employees
+lab15-# WHERE salary > 90000;
+                         QUERY PLAN
+-------------------------------------------------------------
+ Seq Scan on employees  (cost=0.00..12.38 rows=63 width=252)
+   Filter: (salary > '90000'::numeric)
+(2 rows)
+
+
+lab15=# EXPLAIN ANALYZE
+lab15-# SELECT first_name, last_name, salary
+lab15-# FROM employees
+lab15-# WHERE salary > 90000;
+                                                QUERY PLAN         
+----------------------------------------------------------------------------------------------------------
+ Seq Scan on employees  (cost=0.00..12.38 rows=63 width=252) (actual time=0.028..0.032 rows=3.00 loops=1)
+   Filter: (salary > '90000'::numeric)
+   Rows Removed by Filter: 5
+   Buffers: shared hit=1
+ Planning Time: 0.095 ms
+ Execution Time: 0.045 ms
+(6 rows)
+
+
+lab15=# CREATE INDEX idx_employees_salary
+lab15-# ON employees(salary);
+CREATE INDEX
+lab15=# EXPLAIN ANALYZE
+lab15-# SELECT first_name, last_name, salary
+lab15-# FROM employees
+lab15-# WHERE salary > 90000;
+                                               QUERY PLAN          
+--------------------------------------------------------------------------------------------------------
+ Seq Scan on employees  (cost=0.00..1.10 rows=3 width=252) (actual time=0.017..0.020 rows=3.00 loops=1)
+   Filter: (salary > '90000'::numeric)
+   Rows Removed by Filter: 5
+   Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=16 read=1
+ Planning Time: 2.762 ms
+ Execution Time: 0.036 ms
+(8 rows)
+
+
+lab15=# SELECT first_name, last_name, salary
+lab15-# FROM employees;
+ first_name | last_name |  salary
+------------+-----------+-----------
+ Ainura     | Asanova   | 150000.00
+ Bakyt      | Osmonov   | 110000.00
+ Gulzat     | Ermekova  |  70000.00
+ Malika     | Arli      |  95000.00
+ Karim      | Alymov    |  85000.00
+ Aizada     | Bekova    |  65000.00
+ Alice      | Brown     |  80000.00
+ Bob        | Smith     |  60000.00
+(8 rows)
+
+
+lab15=# SELECT first_name, last_name, department, salary
+lab15-# FROM employees
+lab15-# ORDER BY salary DESC
+lab15-# LIMIT 5;
+ first_name | last_name | department  |  salary
+------------+-----------+-------------+-----------
+ Ainura     | Asanova   | Management  | 150000.00
+ Bakyt      | Osmonov   | Engineering | 110000.00
+ Malika     | Arli      | Engineering |  95000.00
+ Karim      | Alymov    | Sales       |  85000.00
+ Alice      | Brown     | Marketing   |  80000.00
+(5 rows)
+
+
+lab15=# \dt
+              List of tables
+ Schema |     Name      | Type  |  Owner
+--------+---------------+-------+----------
+ public | employees     | table | postgres
+ public | orders        | table | postgres
+ public | pivoted_sales | table | postgres
+ public | sales         | table | postgres
+ public | warehouse_1   | table | postgres
+ public | warehouse_2   | table | postgres
+(6 rows)
+
+
+lab15=# \q
