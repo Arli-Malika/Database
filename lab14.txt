@@ -1,0 +1,452 @@
+PS C:\Users\99655> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab14;
+CREATE DATABASE
+postgres=# \c lab14
+You are now connected to database "lab14" as user "postgres".
+lab14=# CREATE TABLE customers (
+lab14(#     customer_id SERIAL PRIMARY KEY,
+lab14(#     name VARCHAR(100),
+lab14(#     email VARCHAR(100)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE orders (
+lab14(#     order_id SERIAL PRIMARY KEY,
+lab14(#     customer_id INTEGER REFERENCES customers(customer_id),
+lab14(#     order_date DATE,
+lab14(#     total_amount DECIMAL(10,2)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE products (
+lab14(# product_id SERIAL PRIMARY KEY,
+lab14(# product_name VARCHAR(100),
+lab14(# price DECIMAL(10,2)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE order_items (
+lab14(# order_item_id SERIAL PRIMARY KEY,
+lab14(# order_id INTEGER REFERENCES orders(order_id),
+lab14(# product_id INTEGER REFERENCES products(product_id),
+lab14(# quantity INTEGER
+lab14(# );
+CREATE TABLE
+lab14=# INSERT INTO customers (name, email) VALUES
+lab14-# ('Ainura', 'ainura@gmail.com'),
+lab14-# ('Bakyt', 'bakyt@gmail.com'),
+lab14-# ('Malika', 'malika@gmail.com'),
+lab14-# ('Karim', 'karim@gmail.com');
+INSERT 0 4
+lab14=# INSERT INTO products (product_name, price) VALUES
+lab14-# ('Laptop', 800),
+lab14-# ('Mouse', 25),
+lab14-# ('Keyboard', 50);
+INSERT 0 3
+lab14=# INSERT INTO orders (customer_id, order_date, total_amount) VALUES
+lab14-# (1, '2024-02-10', 825),
+lab14-# (1, '2024-03-05', 50),
+lab14-# (2, '2023-12-20', 90),
+lab14-# (NULL, '2024-04-18', 200);
+INSERT 0 4
+lab14=# INSERT INTO order_items (order_id, product_id, quantity) VALUES
+lab14-# (1, 1, 1),
+lab14-# (1, 2, 1),
+lab14-# (2, 3, 1),
+lab14-# (3, 2, 2),
+lab14-# (4, 3, 1);
+INSERT 0 5
+lab14=# CREATE TABLE employees (
+lab14(# employee_id SERIAL PRIMARY KEY,
+lab14(# name VARCHAR(100),
+lab14(# manager_id INTEGER REFERENCES employees(employee_id)
+lab14(# );
+CREATE TABLE
+lab14=# INSERT INTO employees (name, manager_id) VALUES
+lab14-# ('Ainura', NULL),
+lab14-# ('Bakyt', 1),
+lab14-# ('Malika', 1),
+lab14-# ('Karim', 2);
+INSERT 0 4
+lab14=# SELECT * FROM employees;
+ employee_id |  name  | manager_id
+-------------+--------+------------
+           1 | Ainura |
+           2 | Bakyt  |          1
+           3 | Malika |          1
+           4 | Karim  |          2
+(4 rows)
+
+
+lab14=# CREATE TABLE users (
+lab14(# user_id SERIAL PRIMARY KEY,
+lab14(# username VARCHAR(100)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE user_profiles (
+lab14(# user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
+lab14(# first_name VARCHAR(100),
+lab14(# last_name VARCHAR(100),
+lab14(# phone VARCHAR(30)
+lab14(# );
+CREATE TABLE
+lab14=# INSERT INTO users (username) VALUES
+lab14-# ('ainura_user'),
+lab14-# ('malika_user'),
+lab14-# ('karim_user');
+INSERT 0 3
+lab14=# INSERT INTO user_profiles (user_id, first_name, last_name, phone) VALUES
+lab14-# (1, 'Ainura', 'Asanova', '+996123111111'),
+lab14-# 2, 'Malika', 'Arli', '+996123222456');
+ERROR:  syntax error at or near "2"
+LINE 3: 2, 'Malika', 'Arli', '+996123222456');
+        ^
+lab14=# INSERT INTO user_profiles (user_id, first_name, last_name, phone) VALUES
+lab14-# (1, 'Ainura', 'Asanova', '+996888111111'),
+lab14-# (2, 'Malika', 'Arli', '+996777222222');
+INSERT 0 2
+lab14=# SELECT * FROM users;
+ user_id |  username
+---------+-------------
+       1 | ainura_user
+       2 | malika_user
+       3 | karim_user
+(3 rows)
+
+
+lab14=# SELECT * FROM user_profiles;
+ user_id | first_name | last_name |     phone
+---------+------------+-----------+---------------
+       1 | Ainura     | Asanova   | +996888111111
+       2 | Malika     | Arli      | +996777222222
+(2 rows)
+
+
+lab14=# CREATE TABLE authors (
+lab14(# author_id SERIAL PRIMARY KEY,
+lab14(# author_name VARCHAR(100)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE books (
+lab14(# book_id SERIAL PRIMARY KEY,
+lab14(# author_id INTEGER REFERENCES authors(author_id),
+lab14(# title VARCHAR(150),
+lab14(# publication_year INTEGER
+lab14(# );
+CREATE TABLE
+lab14=# INSERT INTO authors (author_name)
+lab14-# VALUES
+lab14-# ('Author A'),
+lab14-# ('Author B');
+INSERT 0 2
+lab14=# INSERT INTO books (author_id, title, publication_year) VALUES
+lab14-# (1, 'Introduction to Cybersecurity', 2023),
+lab14-# (1, 'Computer Networks', 2025),
+lab14-# (2, 'Manas', 2024);
+INSERT 0 3
+lab14=# SELECT * FROM authors;
+ author_id | author_name
+-----------+-------------
+         1 | Author A
+         2 | Author B
+(2 rows)
+
+
+lab14=# SELECT * FROM books;
+ book_id | author_id |             title             | publication_year
+---------+-----------+-------------------------------+------------------
+       1 |         1 | Introduction to Cybersecurity |             2023
+       2 |         1 | Computer Networks             |             2025
+       3 |         2 | Manas                         |             2024
+(3 rows)
+
+
+lab14=# CREATE TABLE students (
+lab14(# student_id SERIAL PRIMARY KEY,
+lab14(# student_name VARCHAR(100)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE courses (
+lab14(# course_id SERIAL PRIMARY KEY,
+lab14(# course_name VARCHAR(100)
+lab14(# );
+CREATE TABLE
+lab14=# CREATE TABLE enrollments (
+lab14(# student_id INTEGER REFERENCES students(student_id),
+lab14(# course_id INTEGER REFERENCES courses(course_id),
+lab14(# enrollment_date DATE,
+lab14(# grade VARCHAR(5),
+lab14(# PRIMARY KEY (student_id, course_id)
+lab14(# );
+CREATE TABLE
+lab14=# INSERT INTO students (student_name) VALUES
+lab14-# ('Aizada'),
+lab14-# ('Nursultan'),
+lab14-# ('Meerim');
+INSERT 0 3
+lab14=# INSERT INTO courses (course_name) VALUES
+lab14-# ('Database'),
+lab14-# ('Computer Networks'),
+lab14-# ('Cybersecurity');
+INSERT 0 3
+lab14=# INSERT INTO enrollments (student_id, course_id, enrollment_date, grade) VALUES
+lab14-# (1, 1, '2024-09-01', 'A'),
+lab14-# (1, 2, '2024-09-02', 'B'),
+lab14-# (2, 1, '2024-09-01', 'B'),
+lab14-# (3, 3, '2024-09-03', NULL);
+INSERT 0 4
+lab14=# SELECT * FROM enrollments;
+ student_id | course_id | enrollment_date | grade
+------------+-----------+-----------------+-------
+          1 |         1 | 2024-09-01      | A
+          1 |         2 | 2024-09-02      | B
+          2 |         1 | 2024-09-01      | B
+          3 |         3 | 2024-09-03      |
+(4 rows)
+
+
+lab14=# \dt
+              List of tables
+ Schema |     Name      | Type  |  Owner
+--------+---------------+-------+----------
+ public | authors       | table | postgres
+ public | books         | table | postgres
+ public | courses       | table | postgres
+ public | customers     | table | postgres
+ public | employees     | table | postgres
+ public | enrollments   | table | postgres
+ public | order_items   | table | postgres
+ public | orders        | table | postgres
+ public | products      | table | postgres
+ public | students      | table | postgres
+ public | user_profiles | table | postgres
+ public | users         | table | postgres
+(12 rows)
+
+
+lab14=# SELECT c.name, c.email, o.order_date, o.total_amount
+lab14-# FROM customers c
+lab14-# INNER JOIN orders o ON c.customer_id = o.customer_id;
+  name  |      email       | order_date | total_amount
+--------+------------------+------------+--------------
+ Ainura | ainura@gmail.com | 2024-02-10 |       825.00
+ Ainura | ainura@gmail.com | 2024-03-05 |        50.00
+ Bakyt  | bakyt@gmail.com  | 2023-12-20 |        90.00
+(3 rows)
+
+
+lab14=# SELECT c.name, c.email, o.order_date, o.total_amount
+lab14-# FROM customers c
+lab14-# LEFT JOIN orders o ON c.customer_id = o.customer_id;
+  name  |      email       | order_date | total_amount
+--------+------------------+------------+--------------
+ Ainura | ainura@gmail.com | 2024-02-10 |       825.00
+ Ainura | ainura@gmail.com | 2024-03-05 |        50.00
+ Bakyt  | bakyt@gmail.com  | 2023-12-20 |        90.00
+ Karim  | karim@gmail.com  |            |
+ Malika | malika@gmail.com |            |
+(5 rows)
+
+
+lab14=# SELECT c.name, c.email, o.order_date, o.total_amount
+lab14-# FROM customers c
+lab14-# RIGHT JOIN orders o ON c.customer_id = o.customer_id;
+  name  |      email       | order_date | total_amount
+--------+------------------+------------+--------------
+ Ainura | ainura@gmail.com | 2024-02-10 |       825.00
+ Ainura | ainura@gmail.com | 2024-03-05 |        50.00
+ Bakyt  | bakyt@gmail.com  | 2023-12-20 |        90.00
+        |                  | 2024-04-18 |       200.00
+(4 rows)
+
+
+lab14=# SELECT c.name, c.email, o.order_date, o.total_amount
+lab14-# FROM customers c
+lab14-# FULL OUTER JOIN orders o ON c.customer_id = o.customer_id;
+  name  |      email       | order_date | total_amount
+--------+------------------+------------+--------------
+ Ainura | ainura@gmail.com | 2024-02-10 |       825.00
+ Ainura | ainura@gmail.com | 2024-03-05 |        50.00
+ Bakyt  | bakyt@gmail.com  | 2023-12-20 |        90.00
+        |                  | 2024-04-18 |       200.00
+ Karim  | karim@gmail.com  |            |
+ Malika | malika@gmail.com |            |
+(6 rows)
+
+
+lab14=# SELECT c.name, p.product_name
+lab14-# FROM customers c
+lab14-# CROSS JOIN products p;
+  name  | product_name
+--------+--------------
+ Ainura | Laptop
+ Bakyt  | Laptop
+ Malika | Laptop
+ Karim  | Laptop
+ Ainura | Mouse
+ Bakyt  | Mouse
+ Malika | Mouse
+ Karim  | Mouse
+ Ainura | Keyboard
+ Bakyt  | Keyboard
+ Malika | Keyboard
+ Karim  | Keyboard
+(12 rows)
+
+
+lab14=# SELECT c.name, o.order_date, oi.quantity, p.product_name, p.price
+lab14-# FROM customers c
+lab14-# INNER JOIN orders o ON c.customer_id = o.customer_id
+lab14-# INNER JOIN order_items oi ON o.order_id = oi.order_id
+lab14-# INNER JOIN products p ON oi.product_id = p.product_id;
+  name  | order_date | quantity | product_name | price
+--------+------------+----------+--------------+--------
+ Ainura | 2024-02-10 |        1 | Laptop       | 800.00
+ Ainura | 2024-02-10 |        1 | Mouse        |  25.00
+ Ainura | 2024-03-05 |        1 | Keyboard     |  50.00
+ Bakyt  | 2023-12-20 |        2 | Mouse        |  25.00
+(4 rows)
+
+
+lab14=# SELECT e1.name AS employee, e2.name AS manager
+lab14-# FROM employees e1
+lab14-# LEFT JOIN employees e2 ON e1.manager_id = e2.employee_id;
+ employee | manager
+----------+---------
+ Ainura   |
+ Bakyt    | Ainura
+ Malika   | Ainura
+ Karim    | Bakyt
+(4 rows)
+
+
+lab14=# SELECT c.name, o.order_date, o.total_amount
+lab14-# FROM customers c
+lab14-# INNER JOIN orders o ON c.customer_id = o.customer_id
+lab14-# WHERE o.order_date >= '2024-01-01'
+lab14-# AND o.total_amount > 100;
+  name  | order_date | total_amount
+--------+------------+--------------
+ Ainura | 2024-02-10 |       825.00
+(1 row)
+
+
+lab14=# SELECT u.username, up.first_name, up.last_name, up.phone
+lab14-# FROM users u
+lab14-# LEFT JOIN user_profiles up ON u.user_id = up.user_id;
+  username   | first_name | last_name |     phone
+-------------+------------+-----------+---------------
+ ainura_user | Ainura     | Asanova   | +996888111111
+ malika_user | Malika     | Arli      | +996777222222
+ karim_user  |            |           |
+(3 rows)
+
+
+lab14=# SELECT a.author_name, b.title, b.publication_year
+lab14-# FROM authors a
+lab14-# INNER JOIN books b ON a.author_id = b.author_id
+lab14-# ORDER BY a.author_name, b.publication_year;
+ author_name |             title             | publication_year
+-------------+-------------------------------+------------------
+ Author A    | Introduction to Cybersecurity |             2023
+ Author A    | Computer Networks             |             2025
+ Author B    | Manas                         |             2024
+(3 rows)
+
+
+lab14=# SELECT s.student_name, c.course_name, e.enrollment_date, e.grade
+lab14-# FROM students s
+lab14-# INNER JOIN enrollments e ON s.student_id = e.student_id
+lab14-# INNER JOIN courses c ON e.course_id = c.course_id
+lab14-# WHERE e.grade IS NOT NULL
+lab14-# ORDER BY s.student_name, c.course_name;
+ student_name |    course_name    | enrollment_date | grade
+--------------+-------------------+-----------------+-------
+ Aizada       | Computer Networks | 2024-09-02      | B
+ Aizada       | Database          | 2024-09-01      | A
+ Nursultan    | Database          | 2024-09-01      | B
+(3 rows)
+
+
+lab14=# CREATE INDEX idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX
+lab14=# CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX
+lab14=# CREATE INDEX idx_order_items_product_id ON order_items(product_id);
+CREATE INDEX
+lab14=# SELECT c.name, o.order_date
+lab14-# FROM customers c
+lab14-# INNER JOIN orders o ON c.customer_id = o.customer_id;
+  name  | order_date
+--------+------------
+ Ainura | 2024-03-05
+ Ainura | 2024-02-10
+ Bakyt  | 2023-12-20
+(3 rows)
+
+
+lab14=# SELECT c.name, o.order_date
+lab14-# FROM customers c, orders o;
+  name  | order_date
+--------+------------
+ Ainura | 2024-02-10
+ Ainura | 2024-03-05
+ Ainura | 2023-12-20
+ Ainura | 2024-04-18
+ Bakyt  | 2024-02-10
+ Bakyt  | 2024-03-05
+ Bakyt  | 2023-12-20
+ Bakyt  | 2024-04-18
+ Malika | 2024-02-10
+ Malika | 2024-03-05
+ Malika | 2023-12-20
+ Malika | 2024-04-18
+ Karim  | 2024-02-10
+ Karim  | 2024-03-05
+ Karim  | 2023-12-20
+ Karim  | 2024-04-18
+(16 rows)
+
+
+lab14=# SELECT c.name, o.order_date
+lab14-# FROM customers c
+lab14-# INNER JOIN orders o ON c.customer_id = o.customer_id;
+  name  | order_date
+--------+------------
+ Ainura | 2024-03-05
+ Ainura | 2024-02-10
+ Bakyt  | 2023-12-20
+(3 rows)
+
+
+lab14=# SELECT c.name
+lab14-# FROM customers c
+lab14-# LEFT JOIN orders o ON c.customer_id = o.customer_id
+lab14-# WHERE o.customer_id IS NULL;
+  name
+--------
+ Malika
+ Karim
+(2 rows)
+
+
+lab14=# SELECT s.student_name, c.course_name, e.enrollment_date, e.grade
+lab14-# FROM students s
+lab14-# INNER JOIN enrollments e ON s.student_id = e.student_id
+lab14-# INNER JOIN courses c ON e.course_id = c.course_id
+lab14-# ORDER BY s.student_name, c.course_name;
+ student_name |    course_name    | enrollment_date | grade
+--------------+-------------------+-----------------+-------
+ Aizada       | Computer Networks | 2024-09-02      | B
+ Aizada       | Database          | 2024-09-01      | A
+ Meerim       | Cybersecurity     | 2024-09-03      |
+ Nursultan    | Database          | 2024-09-01      | B
+(4 rows)
+
+
+lab14=# \q
