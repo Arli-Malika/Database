@@ -1,0 +1,522 @@
+PS C:\Users\99655> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# CREATE DATABASE lab16;
+CREATE DATABASE
+postgres=# \c lab16
+You are now connected to database "lab16" as user "postgres".
+lab16=# CREATE TABLE accounts (
+lab16(# account_id INTEGER PRIMARY KEY,
+lab16(# owner_name VARCHAR(100) NOT NULL,
+lab16(# balance NUMERIC(12,2) NOT NULL CHECK (balance >= 0)
+lab16(# );
+CREATE TABLE
+lab16=# INSERT INTO accounts (account_id, owner_name, balance) VALUES
+lab16-# (1, 'Ainura', 2000.00),
+lab16-# (2, 'Bakyt', 1000.00);
+INSERT 0 2
+lab16=# CREATE TABLE customers (
+lab16(# customer_id SERIAL PRIMARY KEY,
+lab16(# name VARCHAR(100) NOT NULL,
+lab16(# email VARCHAR(100) UNIQUE NOT NULL
+lab16(# );
+CREATE TABLE
+lab16=# INSERT INTO customers (name, email) VALUES
+lab16-# ('Ainura', 'ainura@gmail.com');
+INSERT 0 1
+lab16=# CREATE TABLE products (
+lab16(#  product_id INTEGER PRIMARY KEY,
+lab16(# name VARCHAR(100) NOT NULL,
+lab16(# price NUMERIC(10,2) NOT NULL CHECK (price >= 0)
+lab16(# );
+CREATE TABLE
+lab16=# INSERT INTO products (product_id, name, price) VALUES
+lab16-# (101, 'Table', 789.99),
+lab16-# (102, 'Chair', 25.99);
+INSERT 0 2
+lab16=# CREATE TABLE inventory (
+lab16(# product_id INTEGER PRIMARY KEY REFERENCES products(product_id),
+lab16(# stock INTEGER NOT NULL CHECK (stock >= 0)
+lab16(# );
+CREATE TABLE
+lab16=# INSERT INTO inventory (product_id, stock) VALUES
+lab16-# (101, 10),
+lab16-# (102, 20);
+INSERT 0 2
+lab16=# CREATE TABLE orders (
+lab16(# order_id SERIAL PRIMARY KEY,
+lab16(# customer_id INTEGER NOT NULL REFERENCES customers(customer_id),
+lab16(# total NUMERIC(12,2) NOT NULL CHECK (total >= 0)
+lab16(# );
+CREATE TABLE
+lab16=# CREATE TABLE order_items (
+lab16(# order_item_id SERIAL PRIMARY KEY,
+lab16(# order_id INTEGER NOT NULL REFERENCES orders(order_id),
+lab16(# product_id INTEGER NOT NULL REFERENCES products(product_id),
+lab16(# quantity INTEGER NOT NULL CHECK (quantity > 0)
+lab16(# );
+CREATE TABLE
+lab16=# CREATE TABLE logs (
+lab16(# log_id SERIAL PRIMARY KEY,
+lab16(# message TEXT NOT NULL
+lab16(# );
+CREATE TABLE
+lab16=# CREATE TABLE users (
+lab16(# user_id SERIAL PRIMARY KEY,
+lab16(# name VARCHAR(100) NOT NULL,
+lab16(# email VARCHAR(100) UNIQUE NOT NULL
+lab16(# );
+CREATE TABLE
+lab16=# CREATE TABLE user_preferences (
+lab16(# user_id INTEGER PRIMARY KEY REFERENCES users(user_id),
+lab16(# theme VARCHAR(30)
+lab16(# );
+CREATE TABLE
+lab16=# CREATE TABLE audit_log (
+lab16(# audit_id SERIAL PRIMARY KEY,
+lab16(# action VARCHAR(100) NOT NULL,
+lab16(# created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+lab16(# );
+CREATE TABLE
+lab16=# \dt
+                List of tables
+ Schema |       Name       | Type  |  Owner
+--------+------------------+-------+----------
+ public | accounts         | table | postgres
+ public | audit_log        | table | postgres
+ public | customers        | table | postgres
+ public | inventory        | table | postgres
+ public | logs             | table | postgres
+ public | order_items      | table | postgres
+ public | orders           | table | postgres
+ public | products         | table | postgres
+ public | user_preferences | table | postgres
+ public | users            | table | postgres
+(10 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# UPDATE accounts SET balance = balance - 100 WHERE account_id = 1;
+UPDATE 1
+lab16=*# UPDATE accounts SET balance = balance + 100 WHERE account_id = 2;
+UPDATE 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM accounts ORDER BY account_id;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1900.00
+          2 | Bakyt      | 1100.00
+(2 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# UPDATE accounts SET balance = balance - 100 WHERE account_id = 1;
+UPDATE 1
+lab16=*# UPDATE accounts SET balance = balance + 100 WHERE account_id = 2;
+UPDATE 1
+lab16=*# ROLLBACK;
+ROLLBACK
+lab16=# SELECT * FROM accounts ORDER BY account_id;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1900.00
+          2 | Bakyt      | 1100.00
+(2 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# SELECT balance FROM accounts WHERE account_id = 1;
+ balance
+---------
+ 1900.00
+(1 row)
+
+
+lab16=*# UPDATE accounts SET balance = balance - 500 WHERE account_id = 1;
+UPDATE 1
+lab16=*# UPDATE accounts SET balance = balance + 500 WHERE account_id = 2;
+UPDATE 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM accounts ORDER BY account_id;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO orders (customer_id, total) VALUES (1, 250.00);
+INSERT 0 1
+lab16=*# INSERT INTO order_items (order_id, product_id, quantity) VALUES (1, 101, 2);
+INSERT 0 1
+lab16=*# UPDATE inventory SET stock = stock - 2 WHERE product_id = 101;
+UPDATE 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM orders ORDER BY order_id;
+ order_id | customer_id | total
+----------+-------------+--------
+        1 |           1 | 250.00
+(1 row)
+
+
+lab16=# SELECT * FROM order_items ORDER BY order_item_id;
+ order_item_id | order_id | product_id | quantity
+---------------+----------+------------+----------
+             1 |        1 |        101 |        2
+(1 row)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO customers (name, email) VALUES ('John Doe', 'john@email.com');
+INSERT 0 1
+lab16=*# INSERT INTO orders (customer_id, total) VALUES (LASTVAL(), 100.00);
+INSERT 0 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM customers ORDER BY customer_id;
+ customer_id |   name   |      email
+-------------+----------+------------------
+           1 | Ainura   | ainura@gmail.com
+           2 | John Doe | john@email.com
+(2 rows)
+
+
+lab16=# SELECT c.name, o.order_id, o.total FROM customers c INNER JOIN orders o ON c.customer_id = o.customer_id;
+   name   | order_id | total
+----------+----------+--------
+ Ainura   |        1 | 250.00
+ John Doe |        2 | 100.00
+(2 rows)
+
+
+lab16=# BEGIN TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+BEGIN
+lab16=*# SELECT * FROM accounts;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=*# COMMIT;
+COMMIT
+lab16=# BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED;
+BEGIN
+lab16=*# SELECT * FROM accounts WHERE balance > 1000;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=*# SELECT * FROM accounts WHERE balance > 1000; -- May return different results
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=*# COMMIT;
+COMMIT
+lab16=# BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+BEGIN
+lab16=*# SELECT * FROM accounts WHERE balance > 1000;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=*# SELECT * FROM accounts WHERE balance > 1000;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=*# COMMIT;
+COMMIT
+lab16=# BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+lab16=*# SELECT * FROM accounts;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1400.00
+          2 | Bakyt      | 1600.00
+(2 rows)
+
+
+lab16=*# UPDATE accounts SET balance = balance * 1.05;
+UPDATE 2
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM accounts ORDER BY account_id;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1470.00
+          2 | Bakyt      | 1680.00
+(2 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+SET
+lab16=*# SHOW transaction_isolation;
+ transaction_isolation
+-----------------------
+ repeatable read
+(1 row)
+
+
+lab16=*# COMMIT;
+COMMIT
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO customers (name, email) VALUES
+lab16-*# ('Alice', 'alice@email.com');
+INSERT 0 1
+lab16=*# SAVEPOINT after_customer_insert;
+SAVEPOINT
+lab16=*# INSERT INTO orders (customer_id, total) VALUES
+lab16-*# (1, 500.00);
+INSERT 0 1
+lab16=*# ROLLBACK TO SAVEPOINT after_customer_insert;
+ROLLBACK
+lab16=*# INSERT INTO orders (customer_id, total) VALUES (1, 300.00);
+INSERT 0 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM orders ORDER BY order_id;
+ order_id | customer_id | total
+----------+-------------+--------
+        1 |           1 | 250.00
+        2 |           2 | 100.00
+        4 |           1 | 300.00
+(3 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO products (product_id, name, price) VALUES
+lab16-*# (201, 'Demo Laptop', 999.99);
+INSERT 0 1
+lab16=*# SAVEPOINT sp1;
+SAVEPOINT
+lab16=*# INSERT INTO products (product_id, name, price)
+lab16-*# VALUES (202, 'Demo Mouse', 25.99);
+INSERT 0 1
+lab16=*# SAVEPOINT sp2;
+SAVEPOINT
+lab16=*# INSERT INTO products (product_id, name, price)
+lab16-*# VALUES (203, 'Invalid Product', -50.00);
+ERROR:  new row for relation "products" violates check constraint "products_price_check"
+DETAIL:  Failing row contains (203, Invalid Product, -50.00).
+lab16=!# ROLLBACK TO SAVEPOINT sp2;
+ROLLBACK
+lab16=*# INSERT INTO products (product_id, name, price) VALUES
+lab16-*# (204, 'Keyboard', 79.99);
+INSERT 0 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM products ORDER BY product_id;
+ product_id |    name     | price
+------------+-------------+--------
+        101 | Table       | 789.99
+        102 | Chair       |  25.99
+        201 | Demo Laptop | 999.99
+        202 | Demo Mouse  |  25.99
+        204 | Keyboard    |  79.99
+(5 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO logs (message) VALUES ('Starting process');
+INSERT 0 1
+lab16=*# SAVEPOINT process_start;
+SAVEPOINT
+lab16=*# INSERT INTO logs (message) VALUES ('Process completed');
+INSERT 0 1
+lab16=*# RELEASE SAVEPOINT process_start;
+RELEASE
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM logs ORDER BY log_id;
+ log_id |      message
+--------+-------------------
+      1 | Starting process
+      2 | Process completed
+(2 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# UPDATE inventory SET stock = stock - 1 WHERE product_id = 101;
+UPDATE 1
+lab16=*# INSERT INTO order_items (order_id, product_id, quantity) VALUES (1, 101, 1);
+INSERT 0 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM inventory ORDER BY product_id;
+ product_id | stock
+------------+-------
+        101 |     7
+        102 |    20
+(2 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# DO $$
+lab16$*# DECLARE
+lab16$*# current_balance NUMERIC;
+lab16$*# BEGIN
+lab16$*# SELECT balance INTO current_balance
+lab16$*# FROM accounts WHERE account_id = 1 FOR UPDATE;
+lab16$*# IF current_balance < 100000 THEN
+lab16$*# RAISE EXCEPTION 'Insufficient funds';
+lab16$*# END IF;
+lab16$*# UPDATE accounts SET balance = balance - 100000 WHERE account_id = 1;
+lab16$*# UPDATE accounts SET balance = balance + 100000 WHERE account_id = 2;
+lab16$*# EXCEPTION
+lab16$*# WHEN OTHERS THEN
+lab16$*# RAISE NOTICE 'Transaction failed: Insufficient funds';
+lab16$*# END $$;
+NOTICE:  Transaction failed: Insufficient funds
+DO
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM accounts ORDER BY account_id;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1370.00
+          2 | Bakyt      | 1780.00
+(2 rows)
+
+
+lab16=# BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+BEGIN
+lab16=*# SELECT * FROM accounts;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1370.00
+          2 | Bakyt      | 1780.00
+(2 rows)
+
+
+lab16=*# COMMIT;
+COMMIT
+lab16=# BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED;
+BEGIN
+lab16=*# SELECT * FROM accounts;
+ account_id | owner_name | balance
+------------+------------+---------
+          1 | Ainura     | 1370.00
+          2 | Bakyt      | 1780.00
+(2 rows)
+
+
+lab16=*# COMMIT;
+COMMIT
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO orders (customer_id, total)
+lab16-*# VALUES (1, 51.98);
+INSERT 0 1
+lab16=*# SAVEPOINT before_items;
+SAVEPOINT
+lab16=*# INSERT INTO order_items (order_id, product_id, quantity)
+lab16-*# VALUES
+lab16-*# ( currval(pg_get_serial_sequence('orders', 'order_id')),
+lab16(*# 102, 1
+lab16(*# );
+INSERT 0 1
+lab16=*# ROLLBACK TO SAVEPOINT before_items;
+ROLLBACK
+lab16=*# INSERT INTO order_items (order_id, product_id, quantity)
+lab16-*# VALUES
+lab16-*# (currval(pg_get_serial_sequence('orders', 'order_id')),
+lab16(*# 102, 2
+lab16(*# );
+INSERT 0 1
+lab16=*# UPDATE inventory SET stock = stock - 2 WHERE product_id = 102 AND stock >= 2;
+UPDATE 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT
+lab16-#     blocked_locks.pid AS blocked_pid,
+lab16-#     blocked_activity.usename AS blocked_user,
+lab16-#     blocking_locks.pid AS blocking_pid,
+lab16-#     blocking_activity.usename AS blocking_user,
+lab16-#     blocked_activity.query AS blocked_statement
+lab16-# FROM pg_catalog.pg_locks blocked_locks
+lab16-# JOIN pg_catalog.pg_stat_activity blocked_activity
+lab16-#     ON blocked_activity.pid = blocked_locks.pid
+lab16-# JOIN pg_catalog.pg_locks blocking_locks
+lab16-#     ON blocking_locks.locktype = blocked_locks.locktype
+lab16-# JOIN pg_catalog.pg_stat_activity blocking_activity
+lab16-#     ON blocking_activity.pid = blocking_locks.pid
+lab16-# WHERE NOT blocked_locks.granted;
+ blocked_pid | blocked_user | blocking_pid | blocking_user | blocked_statement
+-------------+--------------+--------------+---------------+-------------------
+(0 rows)
+
+
+lab16=# BEGIN;
+BEGIN
+lab16=*# INSERT INTO audit_log (action, created_at)
+lab16-*# VALUES ('user_creation', NOW());
+INSERT 0 1
+lab16=*# INSERT INTO users (name, email)
+lab16-*# VALUES ('John Doe', 'john@example.com');
+INSERT 0 1
+lab16=*# INSERT INTO user_preferences (user_id, theme)
+lab16-*# VALUES (
+lab16(*# currval(pg_get_serial_sequence('users', 'user_id')), 'dark'
+lab16(*# );
+INSERT 0 1
+lab16=*# COMMIT;
+COMMIT
+lab16=# SELECT * FROM audit_log;
+ audit_id |    action     |         created_at
+----------+---------------+----------------------------
+        1 | user_creation | 2026-11-01 20:34:09.330495
+(1 row)
+
+
+lab16=# SELECT * FROM users;
+ user_id |   name   |      email
+---------+----------+------------------
+       1 | John Doe | john@example.com
+(1 row)
+
+
+lab16=# SELECT * FROM user_preferences;
+ user_id | theme
+---------+-------
+       1 | dark
+(1 row)
+
+
+lab16=# \q
