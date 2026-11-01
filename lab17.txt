@@ -1,0 +1,984 @@
+PS C:\Users\99655> cd "C:\Users\99655\Documents\Database"
+PS C:\Users\99655\Documents\Database> mkdir lab17_work
+
+
+    Directory: C:\Users\99655\Documents\Database
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         11/1/2026     22:02                lab17_work
+
+
+PS C:\Users\99655\Documents\Database> psql -U postgres
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+postgres=# \c lab17
+You are now connected to database "lab17" as user "postgres".
+lab17=# \q
+PS C:\Users\99655\Documents\Database> cd lab17_work
+PS C:\Users\99655\Documents\Database\lab17_work> mkdir lab17_files
+
+
+    Directory: C:\Users\99655\Documents\Database\lab17_work
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         11/1/2026     22:21                lab17_files
+
+
+PS C:\Users\99655\Documents\Database\lab17_work> mkdir lab17_backups
+
+
+    Directory: C:\Users\99655\Documents\Database\lab17_work
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         11/1/2026     22:21                lab17_backups
+
+
+PS C:\Users\99655\Documents\Database\lab17_work> dir
+
+
+    Directory: C:\Users\99655\Documents\Database\lab17_work
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         11/1/2026     22:21                lab17_backups
+d-----         11/1/2026     22:21                lab17_files
+
+
+PS C:\Users\99655\Documents\Database\lab17_work> psql -U postgres -d lab17
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+lab17=# CREATE TABLE departments (
+lab17(# department_id SERIAL PRIMARY KEY,
+lab17(# department_name VARCHAR(100) NOT NULL
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO departments (department_name)
+lab17-# VALUES
+lab17-# ('IT'),
+lab17-# ('HR'),
+lab17-# ('Sales');
+INSERT 0 3
+lab17=# CREATE TABLE employees (
+lab17(# employee_id SERIAL PRIMARY KEY,
+lab17(# first_name VARCHAR(50),
+lab17(# last_name VARCHAR(50),
+lab17(# email VARCHAR(100),
+lab17(# department VARCHAR(50)
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO employees (first_name, last_name, email, department)
+lab17-# VALUES
+lab17-# ('Ainura', 'Asanova', 'ainura@gmail.com', 'IT'),
+lab17-# ('Bakyt', 'Osmonov', 'bakyt@gmail.com', 'HR'),
+lab17-# ('Malika', 'Arli', 'malika@gmail.com', 'IT'),
+lab17-# ('Karim', 'Alymov', NULL, 'Sales');
+INSERT 0 4
+lab17=# CREATE TABLE products (
+lab17(# product_id SERIAL PRIMARY KEY,
+lab17(# product_name VARCHAR(100),
+lab17(# price NUMERIC(10,2)
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO products (product_name, price)
+lab17-# VALUES
+lab17-# ('Laptop', 85000),
+lab17-# ('Mouse', 1500),
+lab17-# ('Keyboard', 3500),
+lab17-# ('Monitor', 18000);
+INSERT 0 4
+lab17=# CREATE TABLE customers (
+lab17(# customer_id SERIAL PRIMARY KEY,
+lab17(# name VARCHAR(100),
+lab17(# email VARCHAR(100)
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO customers (name, email)
+lab17-# VALUES
+lab17-# ('Aizada', 'aizada@gmail.com'),
+lab17-# ('Nursultan', 'nursultan@gmail.com'),
+lab17-# ('Meerim', 'meerim@gmail.com');
+INSERT 0 3
+lab17=# CREATE TABLE orders (
+lab17(# order_id SERIAL PRIMARY KEY,
+lab17(# customer_id INTEGER REFERENCES customers(customer_id),
+lab17(# order_date DATE,
+lab17(# total NUMERIC(10,2)
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO orders (customer_id, order_date, total)
+lab17-# VALUES
+lab17-# (1, '2026-01-15', 85000),
+lab17-# (2, '2026-02-10', 1500),
+lab17-# (3, '2026-03-05', 3500);
+INSERT 0 3
+lab17=# CREATE TABLE customer_feedback (
+lab17(# feedback_id SERIAL PRIMARY KEY,
+lab17(# comment TEXT
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO customer_feedback (comment)
+lab17-# VALUES
+lab17-# ('Great product, very useful!'),
+lab17-# ('The product is "excellent", thank you!');
+INSERT 0 2
+lab17=# CREATE TABLE sales_data (
+lab17(# sale_id SERIAL PRIMARY KEY,
+lab17(# amount NUMERIC(10,2),
+lab17(# note TEXT
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO sales_data (amount, note)
+lab17-# VALUES
+lab17-# (1500, 'Online sale'),
+lab17-# (3500, NULL),
+lab17-# (85000, 'Store sale');
+INSERT 0 3
+lab17=# CREATE TABLE log_table (
+lab17(# log_id SERIAL PRIMARY KEY,
+lab17(# message TEXT
+lab17(# );
+CREATE TABLE
+lab17=# CREATE TABLE temp_data (
+lab17(# temp_id SERIAL PRIMARY KEY,
+lab17(# description TEXT
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO log_table (message)
+lab17-# VALUES ('Database initialized');
+INSERT 0 1
+lab17=# INSERT INTO temp_data (description)
+lab17-# VALUES ('Temporary test data');
+INSERT 0 1
+lab17=# \dt
+                List of tables
+ Schema |       Name        | Type  |  Owner
+--------+-------------------+-------+----------
+ public | customer_feedback | table | postgres
+ public | customers         | table | postgres
+ public | departments       | table | postgres
+ public | employees         | table | postgres
+ public | log_table         | table | postgres
+ public | orders            | table | postgres
+ public | products          | table | postgres
+ public | sales_data        | table | postgres
+ public | temp_data         | table | postgres
+(9 rows)
+
+
+lab17=# \copy products TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/products.csv' WITH CSV HEADER
+COPY 4
+lab17=# CREATE TABLE products_import (
+lab17(# LIKE products INCLUDING ALL
+lab17(# );
+CREATE TABLE
+lab17=# \copy products_import FROM 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/products.csv' WITH CSV HEADER
+COPY 4
+lab17=# SELECT * FROM products_import;
+ product_id | product_name |  price
+------------+--------------+----------
+          1 | Laptop       | 85000.00
+          2 | Mouse        |  1500.00
+          3 | Keyboard     |  3500.00
+          4 | Monitor      | 18000.00
+(4 rows)
+
+
+lab17=# \copy employees TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/employees.txt' WITH DELIMITER '|' NULL 'N/A' CSV HEADER
+COPY 4
+lab17=# \copy (SELECT first_name, last_name, email FROM employees) TO 'C:/Users/9
+COPY 4
+lab17=# CREATE TABLE employees_partial (
+lab17(# first_name VARCHAR(50),
+lab17(# last_name VARCHAR(50),
+lab17(# email VARCHAR(100)
+lab17(# );
+CREATE TABLE
+lab17=# \copy employees_partial(first_name, last_name, email) FROM 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/new_employees.csv' WITH CSV HEADER
+COPY 4
+lab17=# SELECT * FROM employees_partial;
+ first_name | last_name |      email
+------------+-----------+------------------
+ Ainura     | Asanova   | ainura@gmail.com
+ Bakyt      | Osmonov   | bakyt@gmail.com
+ Malika     | Arli      | malika@gmail.com
+ Karim      | Alymov    |
+(4 rows)
+
+
+lab17=# \copy (SELECT * FROM employees WHERE department = 'IT') TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/it_employees.csv' WITH CSV HEADER
+COPY 2
+lab17=# \copy products TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/products.csv' WITH CSV HEADER
+COPY 4
+lab17=# \copy customers TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/customers.csv' WITH CSV HEADER DELIMITER ';' QUOTE '"'
+COPY 3
+lab17=# lab17=# \copy orders TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/orders.csv' WITH (FORMAT CSV, HEADER TRUE, FORCE_QUOTE (order_date))
+COPY 3
+lab17=# \q
+PS C:\Users\99655\Documents\Database\lab17_work> @'
+>> product_id,product_name,price
+>> 10,Plant,500.00
+>> 11,Bad Product,invalid
+>> 12,Flower,300.00
+>> '@ | Set-Content -Path "C:\Users\99655\Documents\Database\lab17_work\lab17_files\products_with_errors.csv" -Encoding UTF8
+PS C:\Users\99655\Documents\Database\lab17_work> psql -U postgres -d lab17
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+lab17=# CREATE TABLE products_errors_import (
+lab17(# LIKE products INCLUDING ALL
+lab17(# );
+CREATE TABLE
+lab17=# \copy products_errors_import FROM 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/products_with_errors.csv' WITH (FORMAT CSV, HEADER TRUE, ON_ERROR IGNORE)
+NOTICE:  1 row was skipped due to data type incompatibility
+COPY 2
+lab17=# SELECT * FROM products_errors_import;
+ product_id | product_name | price
+------------+--------------+--------
+         10 | Plant        | 500.00
+         12 | Flower       | 300.00
+(2 rows)
+
+
+lab17=# \copy products TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/products_utf8.csv' WITH CSV HEADER ENCODING 'UTF8'
+COPY 4
+lab17=# CREATE TABLE products_utf8_import (
+lab17(# LIKE products INCLUDING ALL
+lab17(# );
+CREATE TABLE
+lab17=# \copy products_utf8_import FROM 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/products_utf8.csv' WITH CSV HEADER ENCODING 'UTF8'
+COPY 4
+lab17=# \copy customer_feedback TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/feedback.csv' WITH CSV HEADER DELIMITER ',' QUOTE '"' ESCAPE '"'
+COPY 2
+lab17=# \copy sales_data TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/sales.csv' WITH CSV HEADER NULL 'NULL'
+COPY 3
+lab17=# \q
+PS C:\Users\99655\Documents\Database\lab17_work> cd "C:\Users\99655\Documents\Database"
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.sql"
+Password:
+
+PS C:\Users\99655\Documents\Database> dir "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.sql"
+
+
+    Directory:
+    C:\Users\99655\Documents\Database\lab17_work\lab17_backups
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         11/1/2026     23:09          17825 backup.sql
+
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -Fc -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> dir "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+
+
+    Directory:
+    C:\Users\99655\Documents\Database\lab17_work\lab17_backups
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         11/1/2026     23:11          24272 backup.dump
+
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -t employees -t departments -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\tables_backup.sql"
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -Fc -v -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup_verbose.dump"
+Password:
+
+pg_dump: executing SELECT pg_catalog.set_config('search_path', '', false);
+pg_dump: last built-in OID is 16383
+pg_dump: reading extensions
+pg_dump: identifying extension members
+pg_dump: reading schemas
+pg_dump: reading user-defined tables
+pg_dump: reading user-defined functions
+pg_dump: reading user-defined types
+pg_dump: reading procedural languages
+pg_dump: reading user-defined aggregate functions
+pg_dump: reading user-defined operators
+pg_dump: reading user-defined access methods
+pg_dump: reading user-defined operator classes
+pg_dump: reading user-defined operator families
+pg_dump: reading user-defined text search parsers
+pg_dump: reading user-defined text search templates
+pg_dump: reading user-defined text search dictionaries
+pg_dump: reading user-defined text search configurations
+pg_dump: reading user-defined foreign-data wrappers
+pg_dump: reading user-defined foreign servers
+pg_dump: reading default privileges
+pg_dump: reading user-defined collations
+pg_dump: reading user-defined conversions
+pg_dump: reading type casts
+pg_dump: reading transforms
+pg_dump: reading table inheritance information
+pg_dump: reading event triggers
+pg_dump: finding extension tables
+pg_dump: finding inheritance relationships
+pg_dump: reading column info for interesting tables
+pg_dump: finding table default expressions
+pg_dump: flagging inherited columns in subtables
+pg_dump: reading partitioning data
+pg_dump: reading indexes
+pg_dump: flagging indexes in partitioned tables
+pg_dump: reading extended statistics
+pg_dump: reading constraints
+pg_dump: reading triggers
+pg_dump: reading rewrite rules
+pg_dump: reading policies
+pg_dump: reading row-level security policies
+pg_dump: reading publications
+pg_dump: reading publication membership of tables
+pg_dump: reading publication membership of schemas
+pg_dump: reading subscriptions
+pg_dump: reading subscription membership of tables
+pg_dump: reading large objects
+pg_dump: reading dependency data
+pg_dump: saving encoding = UTF8
+pg_dump: saving "standard_conforming_strings = on"
+pg_dump: saving "search_path = "
+pg_dump: saving database definition
+pg_dump: dumping contents of table "public.customer_feedback"
+pg_dump: dumping contents of table "public.customers"
+pg_dump: dumping contents of table "public.departments"
+pg_dump: dumping contents of table "public.employees"
+pg_dump: dumping contents of table "public.employees_partial"
+pg_dump: dumping contents of table "public.log_table"
+pg_dump: dumping contents of table "public.orders"
+pg_dump: dumping contents of table "public.products"
+pg_dump: dumping contents of table "public.products_errors_import"
+pg_dump: dumping contents of table "public.products_import"
+pg_dump: dumping contents of table "public.products_utf8_import"
+pg_dump: dumping contents of table "public.sales_data"
+pg_dump: dumping contents of table "public.temp_data"
+PS C:\Users\99655\Documents\Database> psql -h localhost -U postgres -d postgres -c "CREATE DATABASE lab17_restore;"
+Password for user postgres:
+
+CREATE DATABASE
+PS C:\Users\99655\Documents\Database> pg_restore -h localhost -U postgres -d lab17_restore -v "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+pg_restore: connecting to database for restore
+Password:
+
+pg_restore: executing SELECT pg_catalog.set_config('search_path', '', false);
+pg_restore: creating TABLE "public.customer_feedback"
+pg_restore: creating SEQUENCE "public.customer_feedback_feedback_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.customer_feedback_feedback_id_seq"
+pg_restore: creating TABLE "public.customers"
+pg_restore: creating SEQUENCE "public.customers_customer_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.customers_customer_id_seq"
+pg_restore: creating TABLE "public.departments"
+pg_restore: creating SEQUENCE "public.departments_department_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.departments_department_id_seq"
+pg_restore: creating TABLE "public.employees"
+pg_restore: creating SEQUENCE "public.employees_employee_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.employees_employee_id_seq"
+pg_restore: creating TABLE "public.employees_partial"
+pg_restore: creating TABLE "public.log_table"
+pg_restore: creating SEQUENCE "public.log_table_log_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.log_table_log_id_seq"
+pg_restore: creating TABLE "public.orders"
+pg_restore: creating SEQUENCE "public.orders_order_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.orders_order_id_seq"
+pg_restore: creating TABLE "public.products"
+pg_restore: creating SEQUENCE "public.products_product_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.products_product_id_seq"
+pg_restore: creating TABLE "public.products_errors_import"
+pg_restore: creating TABLE "public.products_import"
+pg_restore: creating TABLE "public.products_utf8_import"
+pg_restore: creating TABLE "public.sales_data"
+pg_restore: creating SEQUENCE "public.sales_data_sale_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.sales_data_sale_id_seq"
+pg_restore: creating TABLE "public.temp_data"
+pg_restore: creating SEQUENCE "public.temp_data_temp_id_seq"
+pg_restore: creating SEQUENCE OWNED BY "public.temp_data_temp_id_seq"
+pg_restore: creating DEFAULT "public.customer_feedback feedback_id"
+pg_restore: creating DEFAULT "public.customers customer_id"
+pg_restore: creating DEFAULT "public.departments department_id"
+pg_restore: creating DEFAULT "public.employees employee_id"
+pg_restore: creating DEFAULT "public.log_table log_id"
+pg_restore: creating DEFAULT "public.orders order_id"
+pg_restore: creating DEFAULT "public.products product_id"
+pg_restore: creating DEFAULT "public.sales_data sale_id"
+pg_restore: creating DEFAULT "public.temp_data temp_id"
+pg_restore: processing data for table "public.customer_feedback"
+pg_restore: processing data for table "public.customers"
+pg_restore: processing data for table "public.departments"
+pg_restore: processing data for table "public.employees"
+pg_restore: processing data for table "public.employees_partial"
+pg_restore: processing data for table "public.log_table"
+pg_restore: processing data for table "public.orders"
+pg_restore: processing data for table "public.products"
+pg_restore: processing data for table "public.products_errors_import"
+pg_restore: processing data for table "public.products_import"
+pg_restore: processing data for table "public.products_utf8_import"
+pg_restore: processing data for table "public.sales_data"
+pg_restore: processing data for table "public.temp_data"
+pg_restore: executing SEQUENCE SET customer_feedback_feedback_id_seq
+pg_restore: executing SEQUENCE SET customers_customer_id_seq
+pg_restore: executing SEQUENCE SET departments_department_id_seq
+pg_restore: executing SEQUENCE SET employees_employee_id_seq
+pg_restore: executing SEQUENCE SET log_table_log_id_seq
+pg_restore: executing SEQUENCE SET orders_order_id_seq
+pg_restore: executing SEQUENCE SET products_product_id_seq
+pg_restore: executing SEQUENCE SET sales_data_sale_id_seq
+pg_restore: executing SEQUENCE SET temp_data_temp_id_seq
+pg_restore: creating CONSTRAINT "public.customer_feedback customer_feedback_pkey"
+pg_restore: creating CONSTRAINT "public.customers customers_pkey"
+pg_restore: creating CONSTRAINT "public.departments departments_pkey"
+pg_restore: creating CONSTRAINT "public.employees employees_pkey"
+pg_restore: creating CONSTRAINT "public.log_table log_table_pkey"
+pg_restore: creating CONSTRAINT "public.orders orders_pkey"
+pg_restore: creating CONSTRAINT "public.products_errors_import products_errors_import_pkey"
+pg_restore: creating CONSTRAINT "public.products_import products_import_pkey"
+pg_restore: creating CONSTRAINT "public.products products_pkey"
+pg_restore: creating CONSTRAINT "public.products_utf8_import products_utf8_import_pkey"
+pg_restore: creating CONSTRAINT "public.sales_data sales_data_pkey"
+pg_restore: creating CONSTRAINT "public.temp_data temp_data_pkey"
+pg_restore: creating FK CONSTRAINT "public.orders orders_customer_id_fkey"
+PS C:\Users\99655\Documents\Database> psql -h localhost -U postgres -d lab17_restore -c "\dt"
+Password for user postgres:
+
+                   List of tables
+ Schema |          Name          | Type  |  Owner
+--------+------------------------+-------+----------
+ public | customer_feedback      | table | postgres
+ public | customers              | table | postgres
+ public | departments            | table | postgres
+ public | employees              | table | postgres
+ public | employees_partial      | table | postgres
+ public | log_table              | table | postgres
+ public | orders                 | table | postgres
+ public | products               | table | postgres
+ public | products_errors_import | table | postgres
+ public | products_import        | table | postgres
+ public | products_utf8_import   | table | postgres
+ public | sales_data             | table | postgres
+ public | temp_data              | table | postgres
+(13 rows)
+
+
+PS C:\Users\99655\Documents\Database> createdb -h localhost -U postgres lab17_new
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_restore -h localhost -U postgres -d lab17_new "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> psql -U postgres -d lab17_new -c "SELECT COUNT(*) FROM customers;"
+Password for user postgres:
+
+ count
+-------
+     3
+(1 row)
+
+
+PS C:\Users\99655\Documents\Database> createdb -h localhost -U postgres lab17_tables_restore
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_restore -h localhost -U postgres -d lab17_tables_restore -t employees "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> psql -U postgres -d lab17_tables_restore -c "SELECT * FROM employees;"
+Password for user postgres:
+
+ employee_id | first_name | last_name |      email       | department -------------+------------+-----------+------------------+------------           1 | Ainura     | Asanova   | ainura@gmail.com | IT
+           2 | Bakyt      | Osmonov   | bakyt@gmail.com  | HR
+           3 | Malika     | Arli      | malika@gmail.com | IT
+           4 | Karim      | Alymov    |                  | Sales
+(4 rows)
+
+
+PS C:\Users\99655\Documents\Database> createdb -h localhost -U postgres lab17_parallel_restore
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_restore -h localhost -U postgres -d lab17_parallel_restore -j 4 "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> psql -U postgres -d lab17_parallel_restore -c "SELECT COUNT(*) FROM products;"
+Password for user postgres:
+
+ count
+-------
+     4
+(1 row)
+
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -s -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\schema_only.sql"
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -a -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\data_only.sql"
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -T log_table -T temp_data -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup_without_logs.sql"
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -Fc --verbose -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\full_lab17_backup.dump"
+Password:
+
+pg_dump: executing SELECT pg_catalog.set_config('search_path', '', false);
+pg_dump: last built-in OID is 16383
+pg_dump: reading extensions
+pg_dump: identifying extension members
+pg_dump: reading schemas
+pg_dump: reading user-defined tables
+pg_dump: reading user-defined functions
+pg_dump: reading user-defined types
+pg_dump: reading procedural languages
+pg_dump: reading user-defined aggregate functions
+pg_dump: reading user-defined operators
+pg_dump: reading user-defined access methods
+pg_dump: reading user-defined operator classes
+pg_dump: reading user-defined operator families
+pg_dump: reading user-defined text search parsers
+pg_dump: reading user-defined text search templates
+pg_dump: reading user-defined text search dictionaries
+pg_dump: reading user-defined text search configurations
+pg_dump: reading user-defined foreign-data wrappers
+pg_dump: reading user-defined foreign servers
+pg_dump: reading default privileges
+pg_dump: reading user-defined collations
+pg_dump: reading user-defined conversions
+pg_dump: reading type casts
+pg_dump: reading transforms
+pg_dump: reading table inheritance information
+pg_dump: reading event triggers
+pg_dump: finding extension tables
+pg_dump: finding inheritance relationships
+pg_dump: reading column info for interesting tables
+pg_dump: finding table default expressions
+pg_dump: flagging inherited columns in subtables
+pg_dump: reading partitioning data
+pg_dump: reading indexes
+pg_dump: flagging indexes in partitioned tables
+pg_dump: reading extended statistics
+pg_dump: reading constraints
+pg_dump: reading triggers
+pg_dump: reading rewrite rules
+pg_dump: reading policies
+pg_dump: reading row-level security policies
+pg_dump: reading publications
+pg_dump: reading publication membership of tables
+pg_dump: reading publication membership of schemas
+pg_dump: reading subscriptions
+pg_dump: reading subscription membership of tables
+pg_dump: reading large objects
+pg_dump: reading dependency data
+pg_dump: saving encoding = UTF8
+pg_dump: saving "standard_conforming_strings = on"
+pg_dump: saving "search_path = "
+pg_dump: saving database definition
+pg_dump: dumping contents of table "public.customer_feedback"
+pg_dump: dumping contents of table "public.customers"
+pg_dump: dumping contents of table "public.departments"
+pg_dump: dumping contents of table "public.employees"
+pg_dump: dumping contents of table "public.employees_partial"
+pg_dump: dumping contents of table "public.log_table"
+pg_dump: dumping contents of table "public.orders"
+pg_dump: dumping contents of table "public.products"
+pg_dump: dumping contents of table "public.products_errors_import"
+pg_dump: dumping contents of table "public.products_import"
+pg_dump: dumping contents of table "public.products_utf8_import"
+pg_dump: dumping contents of table "public.sales_data"
+pg_dump: dumping contents of table "public.temp_data"
+PS C:\Users\99655\Documents\Database> pg_dumpall -h localhost -U postgres -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\full_cluster_backup.sql"
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_dump -h localhost -U postgres -d lab17 -Fc -O -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup_with_ownership.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_restore --list "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\backup.dump"
+;
+; Archive created at 2026-11-01 23:11:06
+;     dbname: lab17
+;     TOC Entries: 79
+;     Compression: gzip
+;     Dump Version: 1.16-0
+;     Format: CUSTOM
+;     Integer: 4 bytes
+;     Offset: 8 bytes
+;     Dumped from database version: 18.6
+;     Dumped by pg_dump version: 18.6
+;
+;
+; Selected TOC Entries:
+;
+230; 1259 17486 TABLE public customer_feedback postgres
+229; 1259 17485 SEQUENCE public customer_feedback_feedback_id_seq postgres
+5124; 0 0 SEQUENCE OWNED BY public customer_feedback_feedback_id_seq postgres
+226; 1259 17465 TABLE public customers postgres
+225; 1259 17464 SEQUENCE public customers_customer_id_seq postgres
+5125; 0 0 SEQUENCE OWNED BY public customers_customer_id_seq postgres
+220; 1259 17440 TABLE public departments postgres
+219; 1259 17439 SEQUENCE public departments_department_id_seq postgres
+5126; 0 0 SEQUENCE OWNED BY public departments_department_id_seq postgres
+222; 1259 17449 TABLE public employees postgres
+221; 1259 17448 SEQUENCE public employees_employee_id_seq postgres
+5127; 0 0 SEQUENCE OWNED BY public employees_employee_id_seq postgres
+238; 1259 17532 TABLE public employees_partial postgres
+234; 1259 17506 TABLE public log_table postgres
+233; 1259 17505 SEQUENCE public log_table_log_id_seq postgres
+5128; 0 0 SEQUENCE OWNED BY public log_table_log_id_seq postgres
+228; 1259 17473 TABLE public orders postgres
+227; 1259 17472 SEQUENCE public orders_order_id_seq postgres
+5129; 0 0 SEQUENCE OWNED BY public orders_order_id_seq postgres
+224; 1259 17457 TABLE public products postgres
+223; 1259 17456 SEQUENCE public products_product_id_seq postgres
+5130; 0 0 SEQUENCE OWNED BY public products_product_id_seq postgres
+239; 1259 17535 TABLE public products_errors_import postgres
+237; 1259 17525 TABLE public products_import postgres
+240; 1259 17542 TABLE public products_utf8_import postgres
+232; 1259 17496 TABLE public sales_data postgres
+231; 1259 17495 SEQUENCE public sales_data_sale_id_seq postgres
+5131; 0 0 SEQUENCE OWNED BY public sales_data_sale_id_seq postgres
+236; 1259 17516 TABLE public temp_data postgres
+235; 1259 17515 SEQUENCE public temp_data_temp_id_seq postgres
+5132; 0 0 SEQUENCE OWNED BY public temp_data_temp_id_seq postgres
+4917; 2604 17489 DEFAULT public customer_feedback feedback_id postgres
+4915; 2604 17468 DEFAULT public customers customer_id postgres
+4912; 2604 17443 DEFAULT public departments department_id postgres
+4913; 2604 17452 DEFAULT public employees employee_id postgres
+4919; 2604 17509 DEFAULT public log_table log_id postgres
+4916; 2604 17476 DEFAULT public orders order_id postgres
+4914; 2604 17460 DEFAULT public products product_id postgres
+4918; 2604 17499 DEFAULT public sales_data sale_id postgres
+4920; 2604 17519 DEFAULT public temp_data temp_id postgres
+5107; 0 17486 TABLE DATA public customer_feedback postgres
+5103; 0 17465 TABLE DATA public customers postgres
+5097; 0 17440 TABLE DATA public departments postgres
+5099; 0 17449 TABLE DATA public employees postgres
+5115; 0 17532 TABLE DATA public employees_partial postgres
+5111; 0 17506 TABLE DATA public log_table postgres
+5105; 0 17473 TABLE DATA public orders postgres
+5101; 0 17457 TABLE DATA public products postgres
+5116; 0 17535 TABLE DATA public products_errors_import postgres
+5114; 0 17525 TABLE DATA public products_import postgres
+5117; 0 17542 TABLE DATA public products_utf8_import postgres
+5109; 0 17496 TABLE DATA public sales_data postgres
+5113; 0 17516 TABLE DATA public temp_data postgres
+5133; 0 0 SEQUENCE SET public customer_feedback_feedback_id_seq postgres
+5134; 0 0 SEQUENCE SET public customers_customer_id_seq postgres
+5135; 0 0 SEQUENCE SET public departments_department_id_seq postgres
+5136; 0 0 SEQUENCE SET public employees_employee_id_seq postgres
+5137; 0 0 SEQUENCE SET public log_table_log_id_seq postgres
+5138; 0 0 SEQUENCE SET public orders_order_id_seq postgres
+5139; 0 0 SEQUENCE SET public products_product_id_seq postgres
+5140; 0 0 SEQUENCE SET public sales_data_sale_id_seq postgres
+5141; 0 0 SEQUENCE SET public temp_data_temp_id_seq postgres
+4935; 2606 17494 CONSTRAINT public customer_feedback customer_feedback_pkey postgres
+4931; 2606 17471 CONSTRAINT public customers customers_pkey postgres
+4925; 2606 17447 CONSTRAINT public departments departments_pkey postgres
+4927; 2606 17455 CONSTRAINT public employees employees_pkey postgres
+4939; 2606 17514 CONSTRAINT public log_table log_table_pkey postgres
+4933; 2606 17479 CONSTRAINT public orders orders_pkey postgres
+4945; 2606 17541 CONSTRAINT public products_errors_import products_errors_import_pkey postgres
+4943; 2606 17531 CONSTRAINT public products_import products_import_pkey postgres
+4929; 2606 17463 CONSTRAINT public products products_pkey postgres
+4947; 2606 17548 CONSTRAINT public products_utf8_import products_utf8_import_pkey postgres
+4937; 2606 17504 CONSTRAINT public sales_data sales_data_pkey postgres
+4941; 2606 17524 CONSTRAINT public temp_data temp_data_pkey postgres
+4948; 2606 17480 FK CONSTRAINT public orders orders_customer_id_fkey postgres
+PS C:\Users\99655\Documents\Database> psql -U postgres -d lab17
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+lab17=# SHOW wal_level;
+ wal_level
+-----------
+ replica
+(1 row)
+
+
+lab17=# SHOW archive_mode;
+ archive_mode
+--------------
+ off
+(1 row)
+
+
+lab17=# SHOW archive_command;
+ archive_command
+-----------------
+ (disabled)
+(1 row)
+
+
+lab17=# SELECT pg_switch_wal();
+ pg_switch_wal
+---------------
+ 0/7EDD958
+(1 row)
+
+
+lab17=# \q
+PS C:\Users\99655\Documents\Database> pg_basebackup --version
+pg_basebackup (PostgreSQL) 18.6
+PS C:\Users\99655\Documents\Database> pg_archivecleanup --version
+pg_archivecleanup (PostgreSQL) 18.6
+PS C:\Users\99655\Documents\Database>  psql -U postgres -d lab17
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+lab17=# SHOW archive_mode;
+ archive_mode
+--------------
+ off
+(1 row)
+
+
+lab17=# SHOW archive_command;
+ archive_command
+-----------------
+ (disabled)
+(1 row)
+
+
+lab17=# SELECT pg_is_in_recovery();
+ pg_is_in_recovery
+-------------------
+ f
+(1 row)
+
+
+lab17=# SELECT pg_current_wal_lsn();
+ pg_current_wal_lsn
+--------------------
+ 0/8000168
+(1 row)
+
+
+lab17=# SELECT pg_create_restore_point('lab17_demo_point');
+ pg_create_restore_point
+-------------------------
+ 0/80001D0
+(1 row)
+
+
+lab17=# \q
+PS C:\Users\99655\Documents\Database> pg_dump -U postgres -d lab17 -Fc -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\migration.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> createdb -U postgres lab17_migrated
+Password:
+
+PS C:\Users\99655\Documents\Database> pg_restore -U postgres -d lab17_migrated "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\migration.dump"
+Password:
+
+PS C:\Users\99655\Documents\Database> psql -U postgres -d lab17_migrated -c "SELECT COUNT(*) FROM customers;"
+Password for user postgres:
+
+ count
+-------
+     3
+(1 row)
+
+
+PS C:\Users\99655\Documents\Database> psql -U postgres -d lab17
+Password for user postgres:
+
+psql (18.6)
+WARNING: Console code page (437) differs from Windows code page (1252)
+         8-bit characters might not work correctly. See psql reference
+         page "Notes for Windows users" for details.
+Type "help" for help.
+
+lab17=# SHOW wal_level;
+ wal_level
+-----------
+ replica
+(1 row)
+
+
+lab17=# SELECT * FROM pg_publication;
+ oid | pubname | pubowner | puballtables | pubinsert | pubupdate | pubdelete | pubtruncate | pubviaroot | pubgencols
+-----+---------+----------+--------------+-----------+-----------+-----------+-------------+------------+------------
+(0 rows)
+
+
+lab17=# SHOW wal_level;
+ wal_level
+-----------
+ replica
+(1 row)
+
+
+lab17=# SHOW max_wal_senders;
+ max_wal_senders
+-----------------
+ 10
+(1 row)
+
+
+lab17=# SHOW max_replication_slots;
+ max_replication_slots
+-----------------------
+ 10
+(1 row)
+
+
+lab17=# SELECT * FROM pg_stat_replication;
+ pid | usesysid | usename | application_name | client_addr | client_hostname | client_port | backend_start | backend_xmin | state | sent_lsn | write_lsn | flush_lsn | replay_lsn | write_lag | flush_lag | replay_lag | sync_priority | sync_state | reply_time
+-----+----------+---------+------------------+-------------+-----------------+-------------+---------------+--------------+-------+----------+-----------+-----------+------------+-----------+-----------+------------+---------------+------------+------------
+(0 rows)
+
+
+lab17=# CREATE TABLE staging_customers AS SELECT * FROM customers WHERE 1=0;
+SELECT 0
+lab17=# \copy (SELECT * FROM customers LIMIT 10000 OFFSET 0) TO 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/customers_batch_1.csv' WITH CSV HEADER
+COPY 3
+lab17=# \copy staging_customers FROM 'C:/Users/99655/Documents/Database/lab17_work/lab17_files/customers_batch_1.csv' WITH CSV HEADER
+COPY 3
+lab17=# SELECT * FROM staging_customers;
+ customer_id |   name    |        email
+-------------+-----------+---------------------
+           1 | Aizada    | aizada@gmail.com
+           2 | Nursultan | nursultan@gmail.com
+           3 | Meerim    | meerim@gmail.com
+(3 rows)
+
+
+lab17=# CREATE TABLE target_customers (
+lab17(# LIKE customers INCLUDING ALL
+lab17(# );
+CREATE TABLE
+lab17=# INSERT INTO target_customers (customer_id, name, email)
+lab17-# SELECT customer_id, name, email
+lab17-# FROM staging_customers
+lab17-# WHERE TRUE
+lab17-# ON CONFLICT (customer_id)
+lab17-# DO UPDATE SET
+lab17-# name = EXCLUDED.name,
+lab17-# email = EXCLUDED.email;
+INSERT 0 3
+lab17=# SELECT * FROM target_customers;
+ customer_id |   name    |        email
+-------------+-----------+---------------------
+           1 | Aizada    | aizada@gmail.com
+           2 | Nursultan | nursultan@gmail.com
+           3 | Meerim    | meerim@gmail.com
+(3 rows)
+
+
+lab17=# SELECT COUNT(*) FROM customers;
+ count
+-------
+     3
+(1 row)
+
+
+lab17=# SELECT COUNT(*) FROM target_customers;
+ count
+-------
+     3
+(1 row)
+
+
+lab17=# SELECT COUNT(*) FROM customers;
+ count
+-------
+     3
+(1 row)
+
+
+lab17=# SELECT COUNT(*) FROM employees;
+ count
+-------
+     4
+(1 row)
+
+
+lab17=# SELECT COUNT(*) FROM products;
+ count
+-------
+     4
+(1 row)
+
+
+lab17=# SELECT COUNT(*) FROM orders;
+ count
+-------
+     3
+(1 row)
+
+
+lab17=# \q
+PS C:\Users\99655\Documents\Database> pg_dump -U postgres -d lab17 -t customers -f "C:\Users\99655\Documents\Database\lab17_work\lab17_backups\small_table.sql"
+Password:
+
+PS C:\Users\99655\Documents\Database> 
